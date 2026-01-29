@@ -1,0 +1,9 @@
+*.hprof
+google-services.json
+*_GUIDE.md
+*_SUMMARY.md
+*_COMPLETE.md
+*_NOW.md
+ADMIN_*.md
+.idea/
+.vscode/

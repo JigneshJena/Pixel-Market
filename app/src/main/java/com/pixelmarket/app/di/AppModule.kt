@@ -3,6 +3,7 @@ package com.pixelmarket.app.di
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.database.FirebaseDatabase
 import com.pixelmarket.app.data.repository.AssetRepositoryImpl
 import com.pixelmarket.app.domain.repository.AssetRepository
 import com.pixelmarket.app.data.repository.AuthRepositoryImpl
@@ -31,6 +32,10 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideFirebaseDatabase(): FirebaseDatabase = FirebaseDatabase.getInstance()
+
+    @Provides
+    @Singleton
     fun provideAuthRepository(
         auth: FirebaseAuth,
         firestore: FirebaseFirestore
@@ -39,6 +44,29 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAssetRepository(
+        firestore: FirebaseFirestore,
+        database: FirebaseDatabase
+    ): AssetRepository = AssetRepositoryImpl(firestore, database)
+    
+    @Provides
+    @Singleton
+    fun provideWalletRepository(
+        firestore: FirebaseFirestore,
+        database: FirebaseDatabase
+    ): com.pixelmarket.app.domain.repository.WalletRepository = 
+        com.pixelmarket.app.data.repository.WalletRepositoryImpl(firestore, database)
+    
+    @Provides
+    @Singleton
+    fun provideDeveloperRepository(
         firestore: FirebaseFirestore
-    ): AssetRepository = AssetRepositoryImpl(firestore)
+    ): com.pixelmarket.app.domain.repository.DeveloperRepository = 
+        com.pixelmarket.app.data.repository.DeveloperRepositoryImpl(firestore)
+    
+    @Provides
+    @Singleton
+    fun provideSalesRepository(
+        firestore: FirebaseFirestore
+    ): com.pixelmarket.app.domain.repository.SalesRepository = 
+        com.pixelmarket.app.data.repository.SalesRepositoryImpl(firestore)
 }

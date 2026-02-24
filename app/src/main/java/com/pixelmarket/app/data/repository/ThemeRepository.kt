@@ -1,7 +1,6 @@
 package com.pixelmarket.app.data.repository
 
 import android.graphics.Color as AndroidColor
-import androidx.compose.ui.graphics.Color
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pixelmarket.app.domain.model.ThemeSettings
 import kotlinx.coroutines.channels.awaitClose
@@ -32,16 +31,5 @@ class ThemeRepository @Inject constructor(
             }
         
         awaitClose { listener.remove() }
-    }
-    
-    /**
-     * Convert hex string to Compose Color
-     */
-    fun hexToColor(hex: String): Color {
-        return try {
-            Color(AndroidColor.parseColor(hex))
-        } catch (e: Exception) {
-            Color(0xFF088395) // Default teal if parsing fails
-        }
     }
 }

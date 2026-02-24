@@ -32,11 +32,15 @@ class AuthViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
+    fun googleLogin(idToken: String) {
+        repository.googleLogin(idToken).onEach { result ->
+            _authState.value = result
+        }.launchIn(viewModelScope)
+    }
 
     private val _isUserLoggedIn = MutableStateFlow(repository.isUserLoggedIn())
     val isUserLoggedIn: StateFlow<Boolean> = _isUserLoggedIn
 
-    
     fun resetAuthState() {
         _authState.value = null
     }

@@ -1,7 +1,13 @@
 package com.pixelmarket.app.data.repository
 
+import android.util.Log
 import com.google.firebase.Timestamp
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pixelmarket.app.domain.model.Asset
 import com.pixelmarket.app.domain.model.Download
@@ -21,78 +27,77 @@ class AssetRepositoryImpl @Inject constructor(
     private val database: FirebaseDatabase
 ) : AssetRepository {
 
-    override fun getFeaturedAssets(): Flow<Resource<List<Asset>>> = flow {
-        emit(Resource.Loading())
-        try {
-            val snapshot = firestore.collection("assets")
-                .whereEqualTo("featured", true)
-                .limit(5)
-                .get()
-                .await()
-            val assets = snapshot.toObjects(Asset::class.java)
-            emit(Resource.Success(assets))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "Error fetching featured assets"))
-        }
-    }
-
-    override fun getTrendingAssets(): Flow<Resource<List<Asset>>> = flow {
-        emit(Resource.Loading())
-        try {
-            val snapshot = firestore.collection("assets")
-                .orderBy("downloadCount", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .limit(10)
-                .get()
-                .await()
-            val assets = snapshot.toObjects(Asset::class.java)
-            emit(Resource.Success(assets))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "Error fetching trending assets"))
-        }
-    }
-
-    override fun getNewReleases(): Flow<Resource<List<Asset>>> = flow {
-        emit(Resource.Loading())
-        try {
-            val snapshot = firestore.collection("assets")
-                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .limit(10)
-                .get()
-                .await()
-            val assets = snapshot.toObjects(Asset::class.java)
-            emit(Resource.Success(assets))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "Error fetching new releases"))
-        }
-    }
-
-    override fun searchAssets(query: String, category: String?): Flow<Resource<List<Asset>>> = flow {
-        emit(Resource.Loading())
-        try {
-            var firestoreQuery: com.google.firebase.firestore.Query = firestore.collection("assets")
-            
-            // 1. Apply category filter if needed (simple equality doesn't need index)
-            if (category != null && category != "All") {
-                firestoreQuery = firestoreQuery.whereEqualTo("category", category)
+    override fun getFeaturedAssets(): Flow<Resource<List<Asset>>> = callbackFlow {
+        trySend(Resource.Loading())
+        val registration = firestore.collection("assets")
+            .whereEqualTo("featured", true)
+            .limit(10)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Resource.Error(error.localizedMessage ?: "Error fetching featured assets"))
+                    return@addSnapshotListener
+                }
+                val assets = snapshot?.toObjects(Asset::class.java) ?: emptyList()
+                trySend(Resource.Success(assets.sortedByDescending { it.createdAt }))
             }
+        awaitClose { registration.remove() }
+    }
 
-            // 2. Apply title range search ONLY if query is not empty
-            // Combining this with whereEqualTo above often requires an index, 
-            // so we handle it more gracefully.
-            if (query.isNotEmpty()) {
-                firestoreQuery = firestoreQuery
-                    .whereGreaterThanOrEqualTo("title", query)
-                    .whereLessThanOrEqualTo("title", query + "\uf8ff")
+    override fun getTrendingAssets(): Flow<Resource<List<Asset>>> = callbackFlow {
+        trySend(Resource.Loading())
+        val registration = firestore.collection("assets")
+            .orderBy("downloadCount", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(15)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Resource.Error(error.localizedMessage ?: "Error fetching trending assets"))
+                    return@addSnapshotListener
+                }
+                val assets = snapshot?.toObjects(Asset::class.java) ?: emptyList()
+                trySend(Resource.Success(assets))
             }
-            
-            val snapshot = firestoreQuery.get().await()
-            val assets = snapshot.toObjects(Asset::class.java)
-                .sortedByDescending { it.createdAt } // Client-side sort to avoid complex indexes
-                
-            emit(Resource.Success(assets))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "Error searching assets"))
+        awaitClose { registration.remove() }
+    }
+
+    override fun getNewReleases(): Flow<Resource<List<Asset>>> = callbackFlow {
+        trySend(Resource.Loading())
+        val registration = firestore.collection("assets")
+            .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(20)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Resource.Error(error.localizedMessage ?: "Error fetching new releases"))
+                    return@addSnapshotListener
+                }
+                val assets = snapshot?.toObjects(Asset::class.java) ?: emptyList()
+                trySend(Resource.Success(assets))
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override fun searchAssets(query: String, category: String?): Flow<Resource<List<Asset>>> = callbackFlow {
+        trySend(Resource.Loading())
+        var firestoreQuery: com.google.firebase.firestore.Query = firestore.collection("assets")
+        
+        if (category != null && category != "All") {
+            firestoreQuery = firestoreQuery.whereEqualTo("category", category)
         }
+
+        if (query.isNotEmpty()) {
+            firestoreQuery = firestoreQuery
+                .whereGreaterThanOrEqualTo("title", query)
+                .whereLessThanOrEqualTo("title", query + "\uf8ff")
+        }
+        
+        val registration = firestoreQuery.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                trySend(Resource.Error(error.localizedMessage ?: "Error searching assets"))
+                return@addSnapshotListener
+            }
+            val assets = snapshot?.toObjects(Asset::class.java) ?: emptyList()
+            trySend(Resource.Success(assets.sortedByDescending { it.createdAt }))
+        }
+        awaitClose { registration.remove() }
     }
 
     override fun getAssetDetails(assetId: String): Flow<Resource<Asset>> = kotlinx.coroutines.flow.callbackFlow {
@@ -115,33 +120,33 @@ class AssetRepositoryImpl @Inject constructor(
         awaitClose { listener.remove() }
     }
 
-    override fun getAllAssets(): Flow<Resource<List<Asset>>> = flow {
-        emit(Resource.Loading())
-        try {
-            val snapshot = firestore.collection("assets")
-                .get()
-                .await()
-            val assets = snapshot.toObjects(Asset::class.java)
-                .sortedByDescending { it.createdAt }
-            emit(Resource.Success(assets))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "Error fetching assets"))
-        }
+    override fun getAllAssets(): Flow<Resource<List<Asset>>> = callbackFlow {
+        trySend(Resource.Loading())
+        val registration = firestore.collection("assets")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Resource.Error(error.localizedMessage ?: "Error fetching assets"))
+                    return@addSnapshotListener
+                }
+                val assets = snapshot?.toObjects(Asset::class.java) ?: emptyList()
+                trySend(Resource.Success(assets.sortedByDescending { it.createdAt }))
+            }
+        awaitClose { registration.remove() }
     }
 
-    override fun getUserAssets(userId: String): Flow<Resource<List<Asset>>> = flow {
-        emit(Resource.Loading())
-        try {
-            val snapshot = firestore.collection("assets")
-                .whereEqualTo("sellerId", userId)
-                .get()
-                .await()
-            val assets = snapshot.toObjects(Asset::class.java)
-                .sortedByDescending { it.createdAt } // Client-side sort to avoid index
-            emit(Resource.Success(assets))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "Error fetching user assets"))
-        }
+    override fun getUserAssets(userId: String): Flow<Resource<List<Asset>>> = callbackFlow {
+        trySend(Resource.Loading())
+        val registration = firestore.collection("assets")
+            .whereEqualTo("sellerId", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Resource.Error(error.localizedMessage ?: "Error fetching user assets"))
+                    return@addSnapshotListener
+                }
+                val assets = snapshot?.toObjects(Asset::class.java) ?: emptyList()
+                trySend(Resource.Success(assets.sortedByDescending { it.createdAt }))
+            }
+        awaitClose { registration.remove() }
     }
 
     override suspend fun createAsset(asset: Asset): Flow<Resource<Unit>> = flow {
@@ -173,33 +178,70 @@ class AssetRepositoryImpl @Inject constructor(
     override suspend fun purchaseAsset(userId: String, asset: Asset): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading())
         try {
-            // Save to user's purchases
+            // 1. Save to buyer's purchases subcollection
             firestore.collection("users")
                 .document(userId)
                 .collection("purchases")
                 .document(asset.id)
                 .set(asset)
                 .await()
-            
-            // Increment download/sale count on the asset itself
+
+            // 2. Credit the SELLER's earnings (atomic increment — soft-fail)
+            if (asset.sellerId.isNotEmpty() && asset.price > 0) {
+                try {
+                    firestore.collection("users")
+                        .document(asset.sellerId)
+                        .update(
+                            mapOf(
+                                "totalEarnings"    to com.google.firebase.firestore.FieldValue.increment(asset.price),
+                                "availableBalance" to com.google.firebase.firestore.FieldValue.increment(asset.price),
+                                "totalSales"       to com.google.firebase.firestore.FieldValue.increment(1)
+                            )
+                        )
+                        .await()
+                    Log.i("AssetRepository", "Seller ${asset.sellerId} credited ₹${asset.price} for '${asset.title}'")
+                } catch (e: Exception) {
+                    Log.e("AssetRepository", "❌ Seller credit FAILED for ${asset.sellerId}: ${e.message}")
+                }
+            }
+
+            // 3. Write a sale record to global `sales` collection (admin reporting)
+            try {
+                val saleId = firestore.collection("sales").document().id
+                firestore.collection("sales").document(saleId).set(
+                    mapOf(
+                        "saleId"       to saleId,
+                        "assetId"      to asset.id,
+                        "assetTitle"   to asset.title,
+                        "buyerId"      to userId,
+                        "developerId"  to asset.sellerId,
+                        "sellerName"   to asset.sellerName,
+                        "amount"       to asset.price,
+                        "soldAt"       to com.google.firebase.Timestamp.now()
+                    )
+                ).await()
+            } catch (e: Exception) {
+                Log.w("AssetRepository", "Sale record skipped (soft-fail): ${e.message}")
+            }
+
+            // 4. Soft-fail: increment downloadCount on the asset document
             try {
                 firestore.collection("assets")
                     .document(asset.id)
                     .update("downloadCount", com.google.firebase.firestore.FieldValue.increment(1))
                     .await()
             } catch (e: Exception) {
-                // Ignore if we don't have permission to update global counts
-                android.util.Log.e("AssetRepository", "Failed to increment download count", e)
+                Log.w("AssetRepository", "downloadCount increment skipped (no write perm, ok): ${e.message}")
             }
 
-            // 3. Notify Seller instantly (RTDB)
+            // 5. Notify Seller instantly via RTDB
             try {
                 database.getReference("instant_alerts")
                     .child(asset.sellerId)
                     .setValue(mapOf(
-                        "title" to "Asset Sold! 💰",
-                        "message" to "You sold '${asset.title}' for ₹${asset.price}!",
-                        "type" to "success",
+                        "title"     to "Asset Sold! 💰",
+                        "message"   to "You sold '${asset.title}' for ₹${asset.price}!",
+                        "type"      to "success",
                         "timestamp" to System.currentTimeMillis()
                     ))
             } catch (e: Exception) { /* soft fail */ }
@@ -210,21 +252,20 @@ class AssetRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getPurchasedAssets(userId: String): Flow<Resource<List<Asset>>> = flow {
-        emit(Resource.Loading())
-        try {
-            val snapshot = firestore.collection("users")
-                .document(userId)
-                .collection("purchases")
-                .get()
-                .await()
-            val assets = snapshot.toObjects(Asset::class.java)
-            emit(Resource.Success(assets))
-        } catch (e: Exception) {
-            // Silently emit empty list — do not expose permission or network errors to the UI
-            android.util.Log.w("AssetRepository", "getPurchasedAssets failed (silent): ${e.message}")
-            emit(Resource.Success(emptyList()))
-        }
+    override fun getPurchasedAssets(userId: String): Flow<Resource<List<Asset>>> = callbackFlow {
+        trySend(Resource.Loading())
+        val registration = firestore.collection("users")
+            .document(userId)
+            .collection("purchases")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Resource.Success(emptyList()))
+                    return@addSnapshotListener
+                }
+                val assets = snapshot?.toObjects(Asset::class.java) ?: emptyList()
+                trySend(Resource.Success(assets.sortedByDescending { it.updatedAt }))
+            }
+        awaitClose { registration.remove() }
     }
 
     override suspend fun isAssetPurchased(userId: String, assetId: String): Boolean {
@@ -244,8 +285,25 @@ class AssetRepositoryImpl @Inject constructor(
     override suspend fun recordDownload(userId: String, asset: Asset): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading())
         try {
+            // ── Guard: skip if user already has a download record for this asset ──
+            // Prevents duplicate entries in Downloads Library for the same account
+            val existingCheck = firestore.collection("users")
+                .document(userId)
+                .collection("downloads")
+                .whereEqualTo("assetId", asset.id)
+                .limit(1)
+                .get()
+                .await()
+
+            if (!existingCheck.isEmpty) {
+                // Already downloaded — skip silently and return success
+                Log.i("AssetRepository", "recordDownload: already recorded for ${asset.id}, skipping")
+                emit(Resource.Success(Unit))
+                return@flow
+            }
+
             val downloadId = firestore.collection("downloads").document().id
-            
+
             // Create download record
             val download = Download(
                 id = downloadId,
@@ -262,13 +320,13 @@ class AssetRepositoryImpl @Inject constructor(
                 fileUrls = asset.fileUrls,
                 downloadStatus = "completed"
             )
-            
+
             // Save to global downloads collection
             firestore.collection("downloads")
                 .document(downloadId)
                 .set(download)
                 .await()
-            
+
             // Save to user's downloads subcollection for easy querying
             firestore.collection("users")
                 .document(userId)
@@ -276,45 +334,64 @@ class AssetRepositoryImpl @Inject constructor(
                 .document(downloadId)
                 .set(download)
                 .await()
-            
+
             emit(Resource.Success(Unit))
         } catch (e: Exception) {
             emit(Resource.Error(e.localizedMessage ?: "Error recording download"))
         }
     }
 
-    override fun getUserDownloads(userId: String): Flow<Resource<List<Download>>> = flow {
-        emit(Resource.Loading())
-        try {
-            val snapshot = firestore.collection("users")
-                .document(userId)
-                .collection("downloads")
-                .orderBy("downloadDate", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .get()
-                .await()
-            val downloads = snapshot.toObjects(Download::class.java)
-            emit(Resource.Success(downloads))
-        } catch (e: Exception) {
-            // Silently emit empty list — do not expose permission or network errors to the UI
-            android.util.Log.w("AssetRepository", "getUserDownloads failed (silent): ${e.message}")
-            emit(Resource.Success(emptyList()))
-        }
+    override fun getUserDownloads(userId: String): Flow<Resource<List<Download>>> = callbackFlow {
+        trySend(Resource.Loading())
+        val registration = firestore.collection("users")
+            .document(userId)
+            .collection("downloads")
+            // NOTE: No orderBy here — avoids requiring a composite Firestore index.
+            // We sort client-side below.
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("AssetRepository", "getUserDownloads error: ${error.message}")
+                    trySend(Resource.Success(emptyList()))
+                    return@addSnapshotListener
+                }
+                val downloads = snapshot?.toObjects(Download::class.java) ?: emptyList()
+                // Sort newest-first on the client
+                trySend(Resource.Success(downloads.sortedByDescending { it.downloadDate }))
+            }
+        awaitClose { registration.remove() }
     }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // ✅ LIKES — Realtime Database (instant, no permission issues)
+    // Path: user_likes/{userId}/{assetId} = true
+    // ──────────────────────────────────────────────────────────────────────────
 
     override suspend fun likeAsset(userId: String, assetId: String): Result<Unit> {
         return try {
-            // Add like document to user's likes subcollection
-            firestore.collection("users")
-                .document(userId)
-                .collection("likes")
-                .document(assetId)
-                .set(mapOf("assetId" to assetId, "likedAt" to com.google.firebase.Timestamp.now()))
+            // 1. Write to RTDB — authenticated users always have write access to their own node
+            database.getReference("user_likes/$userId/$assetId")
+                .setValue(true)
                 .await()
-            // Atomically increment likeCount on asset
-            firestore.collection("assets")
-                .document(assetId)
-                .update("likeCount", com.google.firebase.firestore.FieldValue.increment(1))
-                .await()
+
+            // 2. Increment like count in RTDB (atomic transaction)
+            database.getReference("asset_like_counts/$assetId")
+                .runTransaction(object : com.google.firebase.database.Transaction.Handler {
+                    override fun doTransaction(data: MutableData): com.google.firebase.database.Transaction.Result {
+                        val current = data.getValue(Long::class.java) ?: 0L
+                        data.value = current + 1
+                        return com.google.firebase.database.Transaction.success(data)
+                    }
+                    override fun onComplete(e: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {}
+                })
+
+            // 3. Soft-fail: sync likeCount to Firestore for analytics
+            try {
+                firestore.collection("assets").document(assetId)
+                    .update("likeCount", FieldValue.increment(1)).await()
+            } catch (e: Exception) {
+                Log.w("AssetRepository", "Firestore likeCount sync skipped: ${e.message}")
+            }
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -323,36 +400,129 @@ class AssetRepositoryImpl @Inject constructor(
 
     override suspend fun unlikeAsset(userId: String, assetId: String): Result<Unit> {
         return try {
-            // Remove like document
-            firestore.collection("users")
-                .document(userId)
-                .collection("likes")
-                .document(assetId)
-                .delete()
+            // 1. Remove from RTDB
+            database.getReference("user_likes/$userId/$assetId")
+                .removeValue()
                 .await()
-            // Atomically decrement likeCount on asset
-            firestore.collection("assets")
-                .document(assetId)
-                .update("likeCount", com.google.firebase.firestore.FieldValue.increment(-1))
-                .await()
+
+            // 2. Decrement like count in RTDB (atomic transaction, floor at 0)
+            database.getReference("asset_like_counts/$assetId")
+                .runTransaction(object : com.google.firebase.database.Transaction.Handler {
+                    override fun doTransaction(data: MutableData): com.google.firebase.database.Transaction.Result {
+                        val current = data.getValue(Long::class.java) ?: 0L
+                        data.value = maxOf(0L, current - 1)
+                        return com.google.firebase.database.Transaction.success(data)
+                    }
+                    override fun onComplete(e: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {}
+                })
+
+            // 3. Soft-fail: sync likeCount to Firestore
+            try {
+                firestore.collection("assets").document(assetId)
+                    .update("likeCount", FieldValue.increment(-1)).await()
+            } catch (e: Exception) {
+                Log.w("AssetRepository", "Firestore likeCount sync skipped: ${e.message}")
+            }
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun isAssetLiked(userId: String, assetId: String): Boolean {
-        return try {
-            val doc = firestore.collection("users")
-                .document(userId)
-                .collection("likes")
-                .document(assetId)
-                .get()
-                .await()
-            doc.exists()
-        } catch (e: Exception) {
-            false
+    override fun isAssetLiked(userId: String, assetId: String): Flow<Boolean> = callbackFlow {
+        // Real-time listener on RTDB — updates instantly when like is added/removed
+        val ref = database.getReference("user_likes/$userId/$assetId")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                trySend(snapshot.exists() && snapshot.getValue(Boolean::class.java) == true)
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("AssetRepository", "isAssetLiked cancelled: ${error.message}")
+                trySend(false)
+            }
         }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
+    }
+
+    override fun getAssetLikeCount(assetId: String): Flow<Int> = callbackFlow {
+        // Real-time RTDB listener for like count — only emits when RTDB has data
+        val ref = database.getReference("asset_like_counts/$assetId")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    trySend(snapshot.getValue(Long::class.java)?.toInt() ?: 0)
+                }
+                // If no RTDB data yet, don't emit — ViewModel keeps Firestore value
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("AssetRepository", "getAssetLikeCount cancelled: ${error.message}")
+            }
+        }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // ✅ RATINGS — Realtime Database (instant, no permission issues)
+    // Path: user_ratings/{userId}/{assetId} = { rating: float, timestamp: long }
+    // ──────────────────────────────────────────────────────────────────────────
+
+    override suspend fun rateAsset(assetId: String, rating: Float): Result<Unit> {
+        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+            ?: return Result.failure(Exception("User not logged in"))
+
+        return try {
+            // 1. Write rating to RTDB — always succeeds for authenticated users
+            database.getReference("user_ratings/$userId/$assetId")
+                .setValue(mapOf(
+                    "rating" to rating,
+                    "timestamp" to System.currentTimeMillis()
+                ))
+                .await()
+
+            // 2. Soft-fail: update rolling average in Firestore for display
+            try {
+                firestore.runTransaction { transaction ->
+                    val assetRef = firestore.collection("assets").document(assetId)
+                    val assetDoc = transaction.get(assetRef)
+                    val currentCount = assetDoc.getLong("reviewCount") ?: 0L
+                    val currentRating = assetDoc.getDouble("rating") ?: 0.0
+                    val currentSum = assetDoc.getDouble("totalRatingSum")
+                        ?: (currentRating * currentCount)
+                    val newSum = currentSum + rating
+                    val newCount = currentCount + 1
+                    transaction.update(assetRef, mapOf(
+                        "totalRatingSum" to newSum,
+                        "reviewCount"    to newCount,
+                        "rating"         to newSum / newCount
+                    ))
+                }.await()
+            } catch (e: Exception) {
+                Log.w("AssetRepository", "Firestore rating sync skipped: ${e.message}")
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override fun hasUserRated(userId: String, assetId: String): Flow<Boolean> = callbackFlow {
+        // Real-time listener on RTDB — updates instantly after rating is submitted
+        val ref = database.getReference("user_ratings/$userId/$assetId")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                trySend(snapshot.exists())
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("AssetRepository", "hasUserRated cancelled: ${error.message}")
+                trySend(false)
+            }
+        }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
     }
 }
 

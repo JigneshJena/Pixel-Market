@@ -31,5 +31,10 @@ interface AssetRepository {
     // Like operations
     suspend fun likeAsset(userId: String, assetId: String): Result<Unit>
     suspend fun unlikeAsset(userId: String, assetId: String): Result<Unit>
-    suspend fun isAssetLiked(userId: String, assetId: String): Boolean
+    fun isAssetLiked(userId: String, assetId: String): Flow<Boolean>
+    fun getAssetLikeCount(assetId: String): Flow<Int>
+
+    // Rating operations
+    suspend fun rateAsset(assetId: String, rating: Float): Result<Unit>
+    fun hasUserRated(userId: String, assetId: String): Flow<Boolean>
 }

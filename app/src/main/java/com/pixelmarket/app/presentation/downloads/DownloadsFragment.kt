@@ -34,6 +34,15 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
 
         setupRecyclerViews()
         observeViewModel()
+
+        arguments?.getBoolean("scrollToCart", false)?.let { shouldScroll ->
+            if (shouldScroll) {
+                binding.tvTopHeader.text = "MY SHOPPING CART"
+                binding.scrollView.post {
+                    binding.scrollView.smoothScrollTo(0, binding.sectionCart.top)
+                }
+            }
+        }
     }
 
     private fun setupRecyclerViews() {

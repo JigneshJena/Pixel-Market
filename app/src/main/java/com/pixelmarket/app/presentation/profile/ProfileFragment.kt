@@ -92,7 +92,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         binding.root.findViewById<android.view.View>(R.id.menuCart)?.setOnClickListener {
-            findNavController().navigate(R.id.downloadsFragment)
+            val bundle = Bundle().apply { putBoolean("scrollToCart", true) }
+            findNavController().navigate(R.id.downloadsFragment, bundle)
         }
     }
 

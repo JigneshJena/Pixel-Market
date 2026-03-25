@@ -1,19 +1,314 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="@drawable/bg_glass_main"
+    tools:context=".presentation.ui.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+    <!--
+        Fragment content — always sits ABOVE the nav divider.
+        No overlap possible because of constraint chain.
+    -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_graph"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/navDivider"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Hairline separator — no shadow, just a 1dp slate line -->
+    <View
+        android:id="@+id/navDivider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/slate_200"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!--
+        ══════════════════════════════════════════════════════════
+         BOTTOM NAV BAR
+         Height: 62dp (comfortable touch target)
+         No elevation / rounded corners / shadow.
+
+         Each tab uses RelativeLayout so the active-dot indicator
+         is pinned to the top edge ABSOLUTELY (no layout-flow
+         impact on the icon+label, which are always centered).
+
+         Tabs:
+           1. Home          → always visible
+           2. Market        → always visible
+           3. Upload        → GONE by default; shown for developers
+           4. Library       → always visible
+           5. Profile       → always visible
+
+         With weightSum NOT hardcoded, using android:weightSum on
+         the LinearLayout won't work reliably when children toggle
+         GONE. Instead we rely on weight="1" per-child — when a
+         child is GONE its weight is effectively zero so the
+         remaining children share space evenly. ✓
+        ══════════════════════════════════════════════════════════
+    -->
+    <LinearLayout
+        android:id="@+id/bottomNavBar"
+        android:layout_width="0dp"
+        android:layout_height="62dp"
+        android:orientation="horizontal"
+        android:background="@color/surface_card"
+        android:elevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- ══ HOME ══════════════════════════════════════════════ -->
+        <RelativeLayout
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <!-- 3dp active pill pinned to top, centered horizontally -->
+            <View
+                android:id="@+id/dotNavHome"
+                android:layout_width="20dp"
+                android:layout_height="3dp"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/bg_nav_indicator"
+                android:backgroundTint="@color/primary"
+                android:visibility="visible" />
+
+            <!-- Icon + label, always centered vertically+horizontally -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/ivNavHome"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_home"
+                    android:scaleType="fitCenter"
+                    app:tint="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tvNavHome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Home"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:singleLine="true"
+                    android:textColor="@color/primary" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- ══ MARKET ════════════════════════════════════════════ -->
+        <RelativeLayout
+            android:id="@+id/navMarket"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <View
+                android:id="@+id/dotNavMarket"
+                android:layout_width="20dp"
+                android:layout_height="3dp"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/bg_nav_indicator"
+                android:backgroundTint="@color/primary"
+                android:visibility="invisible" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/ivNavMarket"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_market"
+                    android:scaleType="fitCenter"
+                    app:tint="@color/slate_400" />
+
+                <TextView
+                    android:id="@+id/tvNavMarket"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Market"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:singleLine="true"
+                    android:textColor="@color/slate_400" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- ══ UPLOAD (Developer only — hidden for buyers) ══════ -->
+        <!--
+             This tab is GONE by default. MainActivity.setupRoleBasedNavigation()
+             sets it to VISIBLE when the logged-in user has role == "developer".
+             Because layout_weight="1" + GONE, it takes zero width when hidden,
+             so the remaining 4 tabs share the full bar width evenly. ✓
+        -->
+        <RelativeLayout
+            android:id="@+id/navUploadContainer"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <View
+                android:id="@+id/dotNavUpload"
+                android:layout_width="20dp"
+                android:layout_height="3dp"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/bg_nav_indicator"
+                android:backgroundTint="@color/primary"
+                android:visibility="invisible" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/ivNavUpload"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_upload"
+                    android:scaleType="fitCenter"
+                    app:tint="@color/slate_400" />
+
+                <TextView
+                    android:id="@+id/tvNavUpload"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Upload"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:singleLine="true"
+                    android:textColor="@color/slate_400" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- ══ LIBRARY (Downloads) ═══════════════════════════════ -->
+        <RelativeLayout
+            android:id="@+id/navDownloads"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <View
+                android:id="@+id/dotNavDownloads"
+                android:layout_width="20dp"
+                android:layout_height="3dp"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/bg_nav_indicator"
+                android:backgroundTint="@color/primary"
+                android:visibility="invisible" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/ivNavDownloads"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_download"
+                    android:scaleType="fitCenter"
+                    app:tint="@color/slate_400" />
+
+                <TextView
+                    android:id="@+id/tvNavDownloads"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Library"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:singleLine="true"
+                    android:textColor="@color/slate_400" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- ══ PROFILE ═══════════════════════════════════════════ -->
+        <RelativeLayout
+            android:id="@+id/navProfile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <View
+                android:id="@+id/dotNavProfile"
+                android:layout_width="20dp"
+                android:layout_height="3dp"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/bg_nav_indicator"
+                android:backgroundTint="@color/primary"
+                android:visibility="invisible" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/ivNavProfile"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_profile"
+                    android:scaleType="fitCenter"
+                    app:tint="@color/slate_400" />
+
+                <TextView
+                    android:id="@+id/tvNavProfile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Profile"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:singleLine="true"
+                    android:textColor="@color/slate_400" />
+            </LinearLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

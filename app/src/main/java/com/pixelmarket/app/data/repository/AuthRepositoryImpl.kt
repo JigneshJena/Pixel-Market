@@ -43,6 +43,31 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun googleLogin(idToken: String): Flow<Resource<User>> = flow {
+        emit(Resource.Loading())
+        try {
+            val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+            val result = auth.signInWithCredential(credential).await()
+            val firebaseUser = result.user ?: throw Exception("Google login failed")
+            
+            val userDoc = firestore.collection("users").document(firebaseUser.uid).get().await()
+            val user = if (userDoc.exists()) {
+                userDoc.toObject(User::class.java)!!
+            } else {
+                val newUser = User(
+                    uid = firebaseUser.uid,
+                    email = firebaseUser.email ?: "",
+                    username = firebaseUser.displayName ?: "User_${firebaseUser.uid.take(5)}"
+                )
+                firestore.collection("users").document(firebaseUser.uid).set(newUser).await()
+                newUser
+            }
+            emit(Resource.Success(user))
+        } catch (e: Exception) {
+            emit(Resource.Error(e.localizedMessage ?: "Unknown error occurred"))
+        }
+    }
+
     override fun logout() {
         auth.signOut()
     }

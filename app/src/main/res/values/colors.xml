@@ -1,23 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Teal/Blue Palette -->
-    <color name="dark_teal">#09637E</color>
-    <color name="medium_teal">#088395</color>
-    <color name="light_teal">#7AB2B2</color>
-    <color name="very_light_teal">#EBF4F6</color>
+    <!-- Core Brand Colors (Premium Indigo/Slate focus) -->
+    <color name="primary">#6366F1</color>
+    <color name="primary_variant">#4F46E5</color>
+    <color name="secondary">#0EA5E9</color>
+    <color name="accent">#F43F5E</color>
+
+    <!-- Glassmorphism Tokens - Light Mode -->
+    <color name="glass_surface">#CCFFFFFF</color>
+    <color name="glass_border">#80FFFFFF</color>
+    <color name="glass_background">#F1F5F9</color>
     
-    <!-- Legacy colors for compatibility -->
-    <color name="olive_leaf">#088395</color>
-    <color name="black_forest">#09637E</color>
-    <color name="cornsilk">#EBF4F6</color>
-    <color name="sunlit_clay">#7AB2B2</color>
-    <color name="copperwood">#088395</color>
+    <!-- Surfaces & Backgrounds -->
+    <color name="background_light">#F8FAFC</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="status_bar">#F8FAFC</color>
+    <color name="nav_bar">#F8FAFC</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#64748B</color>
+    <color name="text_muted">#94A3B8</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- Slate Palette for Rich UI -->
+    <color name="slate_50">#F8FAFC</color>
+    <color name="slate_100">#F1F5F9</color>
+    <color name="slate_200">#E2E8F0</color>
+    <color name="slate_300">#CBD5E1</color>
+    <color name="slate_400">#94A3B8</color>
+    <color name="slate_500">#64748B</color>
+    <color name="slate_600">#475569</color>
+    <color name="slate_700">#334155</color>
+    <color name="slate_800">#1E293B</color>
+    <color name="slate_900">#0F172A</color>
+    <color name="slate_950">#020617</color>
+
+    <!-- Interactive & Accents -->
+    <color name="blue_500">#3B82F6</color>
+    <color name="indigo_500">#6366F1</color>
+    <color name="rose_500">#F43F5E</color>
+    <color name="emerald_500">#10B981</color>
+    <color name="amber_500">#F59E0B</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- Blobs/Gradients -->
+    <color name="blob_primary">#226366F1</color>
+    <color name="blob_secondary">#220EA5E9</color>
     
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Legacy compatibility (Teal) -->
+    <color name="dark_teal">#0F172A</color>
+    <color name="medium_teal">#6366F1</color>
+    <color name="light_teal">#94A3B8</color>
+    <color name="very_light_teal">#F1F5F9</color>
+    
+    <color name="olive_leaf">@color/primary</color>
+    <color name="black_forest">@color/primary_variant</color>
+    <color name="cornsilk">@color/slate_100</color>
+    <color name="sunlit_clay">@color/slate_400</color>
+    <color name="copperwood">@color/secondary</color>
+    <color name="dashboard_bg">@color/background_light</color>
+    <color name="dark_bg">@color/slate_950</color>
+    <color name="blob_indigo">@color/blob_primary</color>
+    <color name="glass_white">@color/glass_surface</color>
+    <color name="green_accent">@color/emerald_500</color>
+    <color name="blue_accent">@color/blue_500</color>
+    <color name="amber_accent">@color/amber_500</color>
+    <color name="purple_accent">@color/indigo_500</color>
+    <color name="text_on_dark">@color/white</color>
+    <color name="text_secondary_on_dark">#CCFFFFFF</color>
 </resources>

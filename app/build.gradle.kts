@@ -2,9 +2,9 @@ plugins {
     alias(libs.plugins.androidApp)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hiltAndroid)
-    alias(libs.plugins.googleServices)
-    alias(libs.plugins.composeCompiler)
-    kotlin("kapt")
+    id("com.google.gms.google-services") version "4.4.2"
+    id("androidx.navigation.safeargs.kotlin") version "2.7.7"
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -12,7 +12,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.pixelmarket.app"
+        applicationId = "com.example.pixelmarket"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -34,6 +34,8 @@ android {
         }
     }
     compileOptions {
+        // Enable support for newer Java APIs on older devices
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -41,7 +43,8 @@ android {
         jvmTarget = "17"
     }
     buildFeatures {
-        compose = true
+        viewBinding = true
+        dataBinding = true
     }
     packaging {
         resources {
@@ -52,55 +55,48 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.material.icons.extended)
     implementation(libs.material)
     
-    // Navigation
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.hilt.navigation.compose)
+    // Navigation (Fragment)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    
+    // Swipe Refresh Layout
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.database)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.messaging)
+    implementation(libs.play.services.auth)
 
-    // Image Loading
-    implementation(libs.coil.compose)
+    // Image Loading (Coil View)
+    implementation(libs.coil)
 
-    // Animations
-    implementation(libs.lottie.compose)
-
-    // Permissions
-    implementation(libs.accompanist.permissions)
+    // Animations (Lottie View)
+    implementation(libs.lottie)
 
     // Cloudinary (Cloud Storage)
     implementation(libs.cloudinary.android)
     implementation(libs.okhttp)
 
-    testImplementation(libs.junit)
+    // Razorpay Payment Gateway
+    implementation("com.razorpay:checkout:1.6.40")
+
+    // Java API Desugaring
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    testImplementation(libs.junit.lib)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-}
-
-// Allow references to generated code
-kapt {
-    correctErrorTypes = true
 }

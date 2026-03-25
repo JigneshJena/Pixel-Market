@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    android:elevation="0dp"
+    android:outlineProvider="none"
+    android:stateListAnimator="@null"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/light_teal">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivAssetThumbnail"
+                android:layout_width="100dp"
+                android:layout_height="70dp"
+                android:scaleType="centerCrop"
+                android:background="@color/light_teal"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize10Percent" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvAssetTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Asset Title"
+                    android:textColor="@color/dark_teal"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvSellerName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="by Seller"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tvPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="$10.00"
+                    android:textColor="@color/medium_teal"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchApproval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="12dp"
+            android:background="#EEEEEE" />
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="3"
+            android:alignmentMode="alignMargins">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Category"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary" />
+                <TextView
+                    android:id="@+id/tvCategoryStat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3D Models"
+                    android:textColor="@color/dark_teal"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Downloads"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary" />
+                <TextView
+                    android:id="@+id/tvDownloadCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="150"
+                    android:textColor="@color/dark_teal"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Type"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary" />
+                <TextView
+                    android:id="@+id/tvFileType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ZIP"
+                    android:textColor="@color/dark_teal"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </GridLayout>
+
+        <TextView
+            android:id="@+id/tvAssetId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="ID: ..."
+            android:textSize="10sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="monospace" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFeatured"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Feature"
+                android:textColor="@color/medium_teal"
+                app:icon="@drawable/ic_edit" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDeleteAsset"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                android:textColor="#D32F2F"
+                app:icon="@drawable/ic_delete" />
+        </LinearLayout>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

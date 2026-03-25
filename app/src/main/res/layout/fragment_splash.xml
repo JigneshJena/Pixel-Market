@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D1117">
+
+    <!-- Subtle top-right glow -->
+    <View
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:background="@drawable/glow_orb_primary"
+        android:alpha="0.12"
+        android:layout_marginEnd="-100dp"
+        android:layout_marginTop="-100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Center block: icon + name + tagline -->
+    <LinearLayout
+        android:id="@+id/logoBlock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:alpha="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.44">
+
+        <!-- App Icon -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            app:cardBackgroundColor="#6366F1"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp">
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_layers"
+                app:tint="@color/white" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- App Name -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="PixelMarket"
+            android:textColor="#FFFFFF"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:letterSpacing="-0.03" />
+
+        <!-- Tagline -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Assets for every creator"
+            android:textColor="#60FFFFFF"
+            android:textSize="13sp"
+            android:letterSpacing="0.02" />
+
+    </LinearLayout>
+
+    <!-- Slim loading bar at bottom -->
+    <LinearLayout
+        android:id="@+id/loadingBar"
+        android:layout_width="48dp"
+        android:layout_height="3dp"
+        android:layout_marginBottom="56dp"
+        android:background="#1AFFFFFF"
+        android:clipChildren="true"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <View
+            android:id="@+id/loadingFill"
+            android:layout_width="0dp"
+            android:layout_height="3dp"
+            android:background="@drawable/btn_primary_gradient" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

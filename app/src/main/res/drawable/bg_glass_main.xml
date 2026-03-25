@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Solid base background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/background_light" />
+        </shape>
+    </item>
+
+    <!-- Subtle gradient overlay for depth -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:centerX="30%"
+                android:centerY="30%"
+                android:endColor="@color/transparent"
+                android:gradientRadius="600dp"
+                android:startColor="@color/blob_primary"
+                android:type="radial" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:centerX="70%"
+                android:centerY="70%"
+                android:endColor="@color/transparent"
+                android:gradientRadius="700dp"
+                android:startColor="@color/blob_secondary"
+                android:type="radial" />
+        </shape>
+    </item>
+</layer-list>

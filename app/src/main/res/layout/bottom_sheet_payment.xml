@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/surface_card"
+    android:orientation="vertical"
+    android:paddingTop="8dp">
+
+    <!-- Handle Bar -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/glass_border"
+        android:backgroundTint="@color/slate_400" />
+
+    <!-- Asset Preview Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="24dp"
+        android:paddingBottom="16dp">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/glass_border"
+            app:strokeWidth="1dp">
+
+            <ImageView
+                android:id="@+id/bsThumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tools:src="@drawable/premium_background" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/bsAssetTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Asset Title"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Choose payment method"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/bsAssetPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="₹499"
+            android:textColor="@color/primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/glass_border"
+        android:layout_marginHorizontal="24dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="12dp"
+        android:text="SELECT PAYMENT METHOD"
+        android:textColor="@color/text_muted"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1" />
+
+    <!-- Wallet Payment Option -->
+    <LinearLayout
+        android:id="@+id/cardWalletPay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/glass_panel_rounded"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:cardBackgroundColor="#EFF6FF"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_wallet"
+                app:tint="@color/primary" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PixelMarket Wallet"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvWalletBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Balance: ₹0.00"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_back"
+            android:rotation="180"
+            app:tint="@color/slate_400" />
+    </LinearLayout>
+
+    <!-- Razorpay Payment Option -->
+    <LinearLayout
+        android:id="@+id/cardRazorpayPay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/glass_panel_rounded"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:cardBackgroundColor="#FFF7ED"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_market"
+                app:tint="#F59E0B" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Razorpay"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Cards, UPI, Net Banking &amp; more"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_back"
+            android:rotation="180"
+            app:tint="@color/slate_400" />
+    </LinearLayout>
+
+    <!-- Cancel -->
+    <TextView
+        android:id="@+id/btnCancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="Cancel"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>

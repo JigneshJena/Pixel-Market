@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.pixelmarket.app.presentation.auth.SplashFragment"
+        android:label="SplashFragment"
+        tools:layout="@layout/fragment_splash">
+        <action
+            android:id="@+id/action_splashFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_splashFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_splashFragment_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.pixelmarket.app.presentation.auth.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_loginFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_loginFragment_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.pixelmarket.app.presentation.auth.RegisterFragment"
+        android:label="RegisterFragment"
+        tools:layout="@layout/fragment_register">
+        <action
+            android:id="@+id/action_registerFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left" />
+        <action
+            android:id="@+id/action_registerFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/registerFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.pixelmarket.app.presentation.home.HomeFragment"
+        android:label="HomeFragment"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_assetDetailsFragment"
+            app:destination="@id/assetDetailsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/assetDetailsFragment"
+        android:name="com.pixelmarket.app.presentation.details.AssetDetailsFragment"
+        android:label="AssetDetailsFragment"
+        tools:layout="@layout/fragment_asset_details">
+        <argument
+            android:name="assetId"
+            app:argType="string" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/uploadFragment"
+        android:name="com.pixelmarket.app.presentation.upload.UploadFragment"
+        android:label="UploadFragment" />
+
+    <fragment
+        android:id="@+id/marketplaceFragment"
+        android:name="com.pixelmarket.app.presentation.marketplace.MarketplaceFragment"
+        android:label="MarketplaceFragment" >
+         <action
+            android:id="@+id/action_marketplaceFragment_to_assetDetailsFragment"
+            app:destination="@id/assetDetailsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.pixelmarket.app.presentation.profile.ProfileFragment"
+        android:label="ProfileFragment">
+        <action
+            android:id="@+id/action_profileFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left" />
+        <action
+            android:id="@+id/action_profileFragment_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="com.pixelmarket.app.presentation.admin.AdminDashboardFragment"
+        android:label="AdminDashboardFragment"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminUsersFragment"
+            app:destination="@id/adminUsersFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminAssetsFragment"
+            app:destination="@id/adminAssetsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminThemesFragment"
+            app:destination="@id/adminThemesFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_developerApplicationsFragment"
+            app:destination="@id/adminDeveloperApplicationsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/adminDeveloperApplicationsFragment"
+        android:name="com.pixelmarket.app.presentation.admin.AdminDeveloperApplicationsFragment"
+        android:label="Developer Applications"
+        tools:layout="@layout/fragment_admin_developer_applications" />
+
+    <fragment
+        android:id="@+id/adminUsersFragment"
+        android:name="com.pixelmarket.app.presentation.admin.AdminUsersFragment"
+        android:label="AdminUsersFragment"
+        tools:layout="@layout/fragment_admin_users" />
+
+    <fragment
+        android:id="@+id/adminAssetsFragment"
+        android:name="com.pixelmarket.app.presentation.admin.AdminAssetsFragment"
+        android:label="AdminAssetsFragment"
+        tools:layout="@layout/fragment_admin_assets" />
+
+    <fragment
+        android:id="@+id/adminThemesFragment"
+        android:name="com.pixelmarket.app.presentation.admin.AdminThemesFragment"
+        android:label="AdminThemesFragment"
+        tools:layout="@layout/fragment_admin_themes" />
+    
+    <fragment
+        android:id="@+id/downloadsFragment"
+        android:name="com.pixelmarket.app.presentation.downloads.DownloadsFragment"
+        android:label="DownloadsFragment">
+        <action
+            android:id="@+id/action_downloadsFragment_to_assetDetailsFragment"
+            app:destination="@id/assetDetailsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/walletFragment"
+        android:name="com.pixelmarket.app.presentation.wallet.WalletFragment"
+        android:label="Wallet"
+        tools:layout="@layout/fragment_wallet" />
+    
+    <fragment
+        android:id="@+id/developerRegistrationFragment"
+        android:name="com.pixelmarket.app.presentation.developer.DeveloperRegistrationFragment"
+        android:label="Developer Registration"
+        tools:layout="@layout/fragment_developer_registration" />
+
+</navigation>

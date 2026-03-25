@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dashboard_bg"
+    android:clipToPadding="false"
+    android:scrollbarThumbVertical="@null">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="80dp">
+
+        <!-- ── Top Bar ─────────────────────────────────────────── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.12"
+                    android:text="ADMIN PANEL"
+                    android:textColor="@color/primary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvAdminName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/slate_900"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    tools:text="PixelMarket Admin" />
+            </LinearLayout>
+
+            <!-- Notification bell with badge -->
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginEnd="12dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnNotifications"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardBackgroundColor="@color/glass_surface"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/glass_border"
+                    app:strokeWidth="1dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_notifications"
+                        app:tint="@color/slate_900" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Red dot badge shown when dev apps are pending -->
+                <View
+                    android:id="@+id/notifBadge"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/shape_notif_badge"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <!-- Admin avatar -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivAdminAvatar"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:padding="2dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
+                app:strokeColor="@color/primary"
+                app:strokeWidth="2dp" />
+        </LinearLayout>
+
+        <!-- ── Revenue Strip ──────────────────────────────────── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/glass_panel_rounded"
+            android:backgroundTint="@color/primary"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.1"
+                android:text="TOTAL REVENUE"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvTotalRevenue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/white"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                tools:text="₹0" />
+
+            <!-- Sub stats row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:letterSpacing="0.06"
+                        android:text="SALES"
+                        android:textColor="#80FFFFFF"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvTotalSalesCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="0" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="#40FFFFFF" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingStart="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:letterSpacing="0.06"
+                        android:text="DOWNLOADS"
+                        android:textColor="#80FFFFFF"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvTotalDownloads"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="0" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ── 3 Stat Pills ───────────────────────────────────── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <!-- Users -->
+            <LinearLayout
+                android:id="@+id/cvUsers"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/glass_panel_rounded"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_group"
+                    app:tint="@color/purple_accent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:letterSpacing="0.06"
+                    android:text="USERS"
+                    android:textColor="@color/slate_500"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvFollowersCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/slate_900"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    tools:text="0" />
+            </LinearLayout>
+
+            <!-- Assets -->
+            <LinearLayout
+                android:id="@+id/cvAssets"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/glass_panel_rounded"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_layers"
+                    app:tint="@color/blue_accent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:letterSpacing="0.06"
+                    android:text="ASSETS"
+                    android:textColor="@color/slate_500"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvActiveAssetsCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/slate_900"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    tools:text="0" />
+            </LinearLayout>
+
+            <!-- Pending -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/glass_panel_rounded"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_pending"
+                    app:tint="@color/amber_accent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:letterSpacing="0.06"
+                    android:text="PENDING"
+                    android:textColor="@color/slate_500"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvPendingCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/amber_accent"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    tools:text="0" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ── Dev Applications Alert (shown when pending > 0) ── -->
+        <LinearLayout
+            android:id="@+id/bannerDevApps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/glass_panel_rounded"
+            android:backgroundTint="#FFF8E1"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="14dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_notifications"
+                app:tint="@color/amber_accent" />
+
+            <TextView
+                android:id="@+id/tvBannerText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:textColor="@color/slate_900"
+                android:textSize="13sp"
+                tools:text="3 developer applications waiting for review" />
+
+            <TextView
+                android:id="@+id/tvBannerReview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Review"
+                android:textColor="@color/amber_accent"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- ── Section: Manage ────────────────────────────────── -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:text="Manage"
+            android:textColor="@color/slate_900"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Manage Users row -->
+        <LinearLayout
+            android:id="@+id/cardManageUsers"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/glass_panel_rounded"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_group"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:text="Manage Users"
+                android:textColor="@color/slate_900"
+                android:textSize="15sp" />
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_back"
+                android:rotation="180"
+                app:tint="@color/slate_400" />
+        </LinearLayout>
+
+        <!-- Manage Assets row -->
+        <LinearLayout
+            android:id="@+id/cardManageAssets"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/glass_panel_rounded"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_layers"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:text="Manage Assets"
+                android:textColor="@color/slate_900"
+                android:textSize="15sp" />
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_back"
+                android:rotation="180"
+                app:tint="@color/slate_400" />
+        </LinearLayout>
+
+        <!-- Developer Applications row -->
+        <LinearLayout
+            android:id="@+id/cardDevApps"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/glass_panel_rounded"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_verified"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:text="Developer Applications"
+                android:textColor="@color/slate_900"
+                android:textSize="15sp" />
+
+            <!-- Pending badge count -->
+            <TextView
+                android:id="@+id/tvDevAppsBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/glass_panel_rounded"
+                android:backgroundTint="@color/amber_accent"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="3"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_back"
+                android:rotation="180"
+                app:tint="@color/slate_400" />
+        </LinearLayout>
+
+        <!-- Upload New Asset row -->
+        <LinearLayout
+            android:id="@+id/btnUploadAsset"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/glass_panel_rounded"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_add"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:text="Upload New Asset"
+                android:textColor="@color/slate_900"
+                android:textSize="15sp" />
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_back"
+                android:rotation="180"
+                app:tint="@color/slate_400" />
+        </LinearLayout>
+
+        <!-- Hidden buttons kept for Fragment navigation compatibility -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeveloperApplications"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <!-- ── Recent Assets ──────────────────────────────────── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recent Assets"
+                android:textColor="@color/slate_900"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvViewAllAssets"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="View All"
+                android:textColor="@color/primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/containerRecentAssets"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp" />
+
+        <!-- ── Recent Users ────────────────────────────────────── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recent Users"
+                android:textColor="@color/slate_900"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvViewAllUsers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="View All"
+                android:textColor="@color/primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/containerRecentUsers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp" />
+
+        <!-- ── Logout ──────────────────────────────────────────── -->
+        <LinearLayout
+            android:id="@+id/btnAdminLogout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/glass_panel_rounded"
+            android:backgroundTint="#FFF5F5"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_logout"
+                app:tint="#EF4444" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:text="Logout"
+                android:textColor="#EF4444"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

@@ -132,7 +132,37 @@ class AssetDetailsFragment : Fragment(R.layout.fragment_asset_details), PaymentR
         binding.btnAddToCart.setOnClickListener {
             viewModel.toggleCart()
         }
+
+        binding.btnCreator.setOnClickListener {
+            viewModel.asset.value.data?.let { asset ->
+                showCreatorBottomSheet(asset)
+            }
+        }
     }
+
+    private fun showCreatorBottomSheet(asset: Asset) {
+        val dialog = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme)
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_creator, null)
+        dialog.setContentView(view)
+
+        val ivCreator = view.findViewById<com.google.android.material.imageview.ShapeableImageView>(R.id.ivCreatorSheet)
+        val tvName = view.findViewById<android.widget.TextView>(R.id.tvCreatorSheetName)
+        val tvAssets = view.findViewById<android.widget.TextView>(R.id.tvCreatorSheetAssets)
+        val tvRating = view.findViewById<android.widget.TextView>(R.id.tvCreatorSheetRating)
+        val btnClose = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCloseCreatorSheet)
+
+        tvName.text = asset.sellerName.ifBlank { "Anonymous Creator" }
+        tvAssets.text = asset.sellerAssetCount.toString()
+        tvRating.text = if (asset.sellerRating > 0) String.format("%.1f ★", asset.sellerRating) else "Unrated"
+
+        if (!asset.sellerAvatarUrl.isNullOrBlank()) {
+            ivCreator.load(asset.sellerAvatarUrl) { crossfade(true) }
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
 
     // ──────────────────────────────────────────────────────────────
     // ViewModel Observers

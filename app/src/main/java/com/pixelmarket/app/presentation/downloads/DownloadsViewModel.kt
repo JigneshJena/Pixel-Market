@@ -11,6 +11,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.pixelmarket.app.domain.repository.CartRepository
+import com.pixelmarket.app.domain.model.CartItem
+import com.pixelmarket.app.domain.repository.WalletRepository
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 data class DownloadItem(
@@ -25,7 +29,9 @@ data class DownloadItem(
 @HiltViewModel
 class DownloadsViewModel @Inject constructor(
     private val downloadManager: AssetDownloadManager,
-    private val assetRepository: AssetRepository
+    private val assetRepository: AssetRepository,
+    private val cartRepository: CartRepository,
+    private val walletRepository: WalletRepository
 ) : ViewModel() {
 
     private val _downloads = MutableStateFlow<List<DownloadItem>>(emptyList())
@@ -34,13 +40,89 @@ class DownloadsViewModel @Inject constructor(
     private val _purchasedAssets = MutableStateFlow<Resource<List<Asset>>>(Resource.Loading())
     val purchasedAssets: StateFlow<Resource<List<Asset>>> = _purchasedAssets
 
+    private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
+    val cartItems: StateFlow<List<CartItem>> = _cartItems
+
     private val _downloadHistory = MutableStateFlow<Resource<List<Download>>>(Resource.Loading())
     val downloadHistory: StateFlow<Resource<List<Download>>> = _downloadHistory
+
+    private val _checkoutStatus = MutableStateFlow<Resource<Unit>?>(null)
+    val checkoutStatus: StateFlow<Resource<Unit>?> = _checkoutStatus
 
     init {
         loadPurchasedAssets()
         loadDownloadHistory()
+        loadCartItems()
         startDownloadMonitoring()
+    }
+
+    fun loadCartItems() {
+        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid 
+            ?: return
+        
+        viewModelScope.launch {
+            cartRepository.getCartItems(userId).collect { items ->
+                _cartItems.value = items
+            }
+        }
+    }
+
+    fun removeFromCart(assetId: String) {
+        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid 
+            ?: return
+        viewModelScope.launch {
+            cartRepository.removeFromCart(userId, assetId)
+        }
+    }
+
+    fun checkoutAll() {
+        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid 
+            ?: return
+        val items = _cartItems.value
+        if (items.isEmpty()) return
+
+        viewModelScope.launch {
+            _checkoutStatus.value = Resource.Loading()
+            
+            val totalAmount = items.sumOf { it.price }
+            val balance = walletRepository.getWalletBalance(userId)
+
+            if (balance < totalAmount) {
+                _checkoutStatus.value = Resource.Error("Insufficient balance. Please top up your wallet.")
+                return@launch
+            }
+
+            try {
+                // Deduct total amount
+                walletRepository.deductMoney(userId, totalAmount, "Purchase of ${items.size} assets")
+
+                // Purchase each asset
+                for (item in items) {
+                    // Fetch full asset details first to ensure we have file URLs
+                    assetRepository.getAssetDetails(item.assetId).first { resource ->
+                        if (resource is Resource.Success && resource.data != null) {
+                            assetRepository.purchaseAsset(userId, resource.data).collect { }
+                            true
+                        } else resource is Resource.Error
+                    }
+                }
+
+                // Clear cart
+                cartRepository.clearCart(userId)
+                
+                _checkoutStatus.value = Resource.Success(Unit)
+                loadPurchasedAssets()
+            } catch (e: Exception) {
+                _checkoutStatus.value = Resource.Error(e.localizedMessage ?: "Checkout failed")
+            }
+        }
+    }
+
+    /**
+     * Clear checkout status after it's been handled by the UI
+     */
+    fun resetCheckoutStatus() {
+        _checkoutStatus.value = null
     }
 
     fun loadPurchasedAssets() {

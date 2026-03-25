@@ -131,7 +131,7 @@ class UploadViewModel @Inject constructor(
     fun uploadPreviewVideo(fileUri: Uri) {
         viewModelScope.launch {
             _uiState.value = UploadUiState.UploadingFiles
-            storageRepository.uploadAssetFile(fileUri).collect { result ->
+            storageRepository.uploadPreviewVideo(fileUri).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         _previewVideoUrl.value = result.data
@@ -167,12 +167,26 @@ class UploadViewModel @Inject constructor(
             _uiState.value = UploadUiState.SavingAsset
 
             try {
-                // 1. Verify developer permission
-                val userDoc = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                // 1. Verify developer permission (Robust check)
+                val snapshot = com.google.firebase.firestore.FirebaseFirestore.getInstance()
                     .collection("users").document(currentUser.uid).get().await()
                 
-                val isDev = userDoc.getBoolean("isDeveloper") ?: false
-                if (!isDev) {
+                if (!snapshot.exists()) {
+                    _uiState.value = UploadUiState.Error("User record not found.")
+                    return@launch
+                }
+
+                val role = snapshot.getString("role")?.lowercase() ?: "buyer"
+                fun isEnabled(f: String) = try {
+                    val v = snapshot.get(f)
+                    v is Boolean && v || v?.toString()?.lowercase() == "true" || v?.toString() == "1"
+                } catch (ex: Exception) { false }
+
+                val hasDevAccess = isEnabled("isDeveloper") || isEnabled("isAdmin") || 
+                                   isEnabled("developer") || isEnabled("admin") ||
+                                   role == "seller" || role == "admin" || role == "developer"
+
+                if (!hasDevAccess) {
                     _uiState.value = UploadUiState.Error("Your account does not have developer permissions. Please apply first.")
                     return@launch
                 }

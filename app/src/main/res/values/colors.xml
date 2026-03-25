@@ -5,6 +5,7 @@
     <color name="primary_variant">#4F46E5</color>
     <color name="secondary">#0EA5E9</color>
     <color name="accent">#F43F5E</color>
+    <color name="primary_faint">#1A6366F1</color>
 
     <!-- Glassmorphism Tokens - Light Mode -->
     <color name="glass_surface">#CCFFFFFF</color>

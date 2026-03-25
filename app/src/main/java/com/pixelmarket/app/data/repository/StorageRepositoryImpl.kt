@@ -32,6 +32,16 @@ class StorageRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun uploadPreviewVideo(fileUri: Uri): Flow<Resource<String>> = flow {
+        try {
+            emit(Resource.Loading())
+            val url = cloudinaryManager.uploadPreviewVideo(fileUri)
+            emit(Resource.Success(url))
+        } catch (e: Exception) {
+            emit(Resource.Error(e.message ?: "Failed to upload preview video"))
+        }
+    }
+
     override suspend fun deleteFile(fileUrl: String): Flow<Resource<Unit>> = flow {
         // Cloudinary file deletion (optional - files can stay in cloud)
         // You can implement deletion via Cloudinary API if needed

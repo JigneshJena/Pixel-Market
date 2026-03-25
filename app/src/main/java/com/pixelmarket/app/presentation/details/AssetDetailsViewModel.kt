@@ -1,13 +1,16 @@
 package com.pixelmarket.app.presentation.details
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.pixelmarket.app.data.service.AssetDownloadManager
 import com.pixelmarket.app.domain.model.Asset
 import com.pixelmarket.app.domain.repository.AssetRepository
+import com.pixelmarket.app.domain.repository.CartRepository
 import com.pixelmarket.app.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,7 +28,8 @@ sealed class PurchaseState {
 class AssetDetailsViewModel @Inject constructor(
     private val assetRepository: AssetRepository,
     private val walletRepository: WalletRepository,
-    private val downloadManager: AssetDownloadManager
+    private val downloadManager: AssetDownloadManager,
+    private val cartRepository: CartRepository
 ) : ViewModel() {
 
     private val _asset = MutableStateFlow<Resource<Asset>>(Resource.Loading())
@@ -44,33 +48,155 @@ class AssetDetailsViewModel @Inject constructor(
     private val _likeCount = MutableStateFlow(0)
     val likeCount: StateFlow<Int> = _likeCount
 
+    private val _hasUserRated = MutableStateFlow(false)
+    val hasUserRated: StateFlow<Boolean> = _hasUserRated
+
+    // One-shot error events for like/rating failures
+    private val _errorEvent = Channel<String>(Channel.BUFFERED)
+    val errorEvent: Flow<String> = _errorEvent.receiveAsFlow()
+
+    // One-shot success events for rating
+    private val _ratingSuccessEvent = Channel<Unit>(Channel.BUFFERED)
+    val ratingSuccessEvent: Flow<Unit> = _ratingSuccessEvent.receiveAsFlow()
+
+    // Cart state
+    private val _isInCart = MutableStateFlow(false)
+    val isInCart: StateFlow<Boolean> = _isInCart
+
+    // Cart events: "added" | "removed" | "already_in_cart" | "error" | "login_required"
+    private val _cartEvent = Channel<String>(Channel.BUFFERED)
+    val cartEvent: Flow<String> = _cartEvent.receiveAsFlow()
+
     private var currentAssetId: String = ""
+    // Guard flags so we don't re-launch listeners on every Firestore update
+    private var likeCountInitialized = false
+    private var purchaseAndRatingChecked = false
 
     fun loadAssetDetails(assetId: String) {
         currentAssetId = assetId
+        likeCountInitialized = false
+        purchaseAndRatingChecked = false
+
+        // ── 1. Firestore asset stream ──────────────────────────────────────────
         viewModelScope.launch {
             assetRepository.getAssetDetails(assetId).collect { result ->
                 _asset.value = result
 
-                // Check if already purchased if we have user and asset
-                val userId = FirebaseAuth.getInstance().currentUser?.uid
-                if (userId != null && result is Resource.Success) {
-                    _isPurchased.value = assetRepository.isAssetPurchased(userId, assetId)
+                if (result is Resource.Success) {
+                    result.data?.let { asset ->
 
-                    // Update like count from real-time asset data
-                    _likeCount.value = result.data?.likeCount ?: 0
+                        // Set likeCount ONCE from Firestore on first load.
+                        // After that, RTDB listener (below) owns the count.
+                        if (!likeCountInitialized) {
+                            _likeCount.value = asset.likeCount
+                            likeCountInitialized = true
+                        }
+
+                        // Check purchase & rating status ONCE — not on every Firestore ping
+                        if (!purchaseAndRatingChecked) {
+                            purchaseAndRatingChecked = true
+                            val userId = FirebaseAuth.getInstance().currentUser?.uid
+                            if (userId != null) {
+                                _isPurchased.value = assetRepository.isAssetPurchased(userId, assetId)
+                                checkUserRated(userId, assetId)
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // Check if user has liked this asset
+        // ── 2. RTDB real-time like count ───────────────────────────────────────
+        // Only overrides Firestore value once RTDB has data (first like ever sets it)
+        viewModelScope.launch {
+            assetRepository.getAssetLikeCount(assetId).collect { rtdbCount ->
+                _likeCount.value = rtdbCount
+                likeCountInitialized = true
+            }
+        }
+
+        // ── 3. RTDB real-time like status ──────────────────────────────────────
         checkLikeStatus(assetId)
+
+        // ── 4. Cart status ─────────────────────────────────────────────────────
+        checkCartStatus(assetId)
+    }
+
+    private fun checkCartStatus(assetId: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        viewModelScope.launch {
+            _isInCart.value = cartRepository.isInCart(userId, assetId)
+        }
+    }
+
+    fun toggleCart() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val authUid = currentUser?.uid
+        
+        if (authUid == null) {
+            _cartEvent.trySend("login_required")
+            return
+        }
+        
+        val asset = _asset.value.data ?: return
+        
+        if (_isPurchased.value) {
+            _cartEvent.trySend("already_purchased")
+            return
+        }
+
+        viewModelScope.launch {
+            if (_isInCart.value) {
+                // Remove from cart
+                val result = cartRepository.removeFromCart(authUid, asset.id)
+                if (result.isSuccess) {
+                    _isInCart.value = false
+                    _cartEvent.trySend("removed")
+                } else {
+                    _cartEvent.trySend("error:${result.exceptionOrNull()?.message}")
+                }
+            } else {
+                // Add to cart
+                val result = cartRepository.addToCart(authUid, asset)
+                if (result.isSuccess) {
+                    _isInCart.value = true
+                    _cartEvent.trySend("added")
+                } else {
+                    _cartEvent.trySend("error:${result.exceptionOrNull()?.message}")
+                }
+            }
+        }
+    }
+
+    private fun checkUserRated(userId: String, assetId: String) {
+        viewModelScope.launch {
+            assetRepository.hasUserRated(userId, assetId).collect { rated ->
+                _hasUserRated.value = rated
+            }
+        }
+    }
+
+    fun submitRating(rating: Float) {
+        val assetId = currentAssetId.ifEmpty { return }
+        viewModelScope.launch {
+            val result = assetRepository.rateAsset(assetId, rating)
+            if (result.isSuccess) {
+                _hasUserRated.value = true
+                _ratingSuccessEvent.trySend(Unit)
+            } else {
+                val errMsg = result.exceptionOrNull()?.message ?: "Rating failed"
+                Log.e("AssetDetailsVM", "submitRating failed: $errMsg")
+                _errorEvent.trySend("Could not submit rating. Please try again.")
+            }
+        }
     }
 
     private fun checkLikeStatus(assetId: String) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         viewModelScope.launch {
-            _isLiked.value = assetRepository.isAssetLiked(userId, assetId)
+            assetRepository.isAssetLiked(userId, assetId).collect { liked ->
+                _isLiked.value = liked
+            }
         }
     }
 
@@ -78,21 +204,24 @@ class AssetDetailsViewModel @Inject constructor(
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val assetId = currentAssetId.ifEmpty { return }
 
+        // Optimistic update — flip immediately for instant feedback
+        val wasLiked = _isLiked.value
+        _isLiked.value = !wasLiked
+        _likeCount.value = if (wasLiked) maxOf(0, _likeCount.value - 1) else _likeCount.value + 1
+
         viewModelScope.launch {
-            if (_isLiked.value) {
-                // Unlike
-                val result = assetRepository.unlikeAsset(userId, assetId)
-                if (result.isSuccess) {
-                    _isLiked.value = false
-                    _likeCount.value = (_likeCount.value - 1).coerceAtLeast(0)
-                }
+            val result = if (wasLiked) {
+                assetRepository.unlikeAsset(userId, assetId)
             } else {
-                // Like
-                val result = assetRepository.likeAsset(userId, assetId)
-                if (result.isSuccess) {
-                    _isLiked.value = true
-                    _likeCount.value = _likeCount.value + 1
-                }
+                assetRepository.likeAsset(userId, assetId)
+            }
+            if (result.isFailure) {
+                // Rollback the optimistic update
+                _isLiked.value = wasLiked
+                _likeCount.value = if (wasLiked) _likeCount.value + 1 else maxOf(0, _likeCount.value - 1)
+                val errMsg = result.exceptionOrNull()?.message ?: "Action failed"
+                Log.e("AssetDetailsVM", "toggleLike failed: $errMsg")
+                _errorEvent.trySend("Could not update like. Please try again.")
             }
         }
     }

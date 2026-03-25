@@ -85,6 +85,7 @@ data class Asset(
     val tags: List<String> = emptyList(),
     val rating: Double = 0.0,
     val reviewCount: Int = 0,
+    val totalRatingSum: Double = 0.0,
     val downloadCount: Int = 0,
     val likeCount: Int = 0,
     val createdAt: Timestamp = Timestamp.now(),
@@ -182,6 +183,19 @@ data class DeveloperApplication(
     val appliedAt: Timestamp = Timestamp.now(),
     val reviewedAt: Timestamp? = null,
     val reviewedBy: String = ""
+)
+
+// ── Cart Item ──────────────────────────────────────────────────────────────
+data class CartItem(
+    val cartItemId: String = "",   // Firestore doc ID (== assetId for uniqueness)
+    val assetId: String = "",
+    val title: String = "",
+    val thumbnailUrl: String = "",
+    val price: Double = 0.0,
+    val sellerId: String = "",
+    val sellerName: String = "",
+    val category: String = "",
+    val addedAt: Timestamp = Timestamp.now()
 )
 
 // ── Transaction ────────────────────────────────────────────────────────────

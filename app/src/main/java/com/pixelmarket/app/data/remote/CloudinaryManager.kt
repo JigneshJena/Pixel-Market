@@ -90,4 +90,11 @@ class CloudinaryManager {
     suspend fun uploadAssetFile(fileUri: Uri): String {
         return uploadFile(fileUri, "assets")
     }
+
+    /**
+     * Upload a short preview video clip (5-10s) — saved in a dedicated folder
+     */
+    suspend fun uploadPreviewVideo(fileUri: Uri): String {
+        return uploadFile(fileUri, "preview_videos")
+    }
 }

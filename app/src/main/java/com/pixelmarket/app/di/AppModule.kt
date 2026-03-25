@@ -69,4 +69,11 @@ object AppModule {
         firestore: FirebaseFirestore
     ): com.pixelmarket.app.domain.repository.SalesRepository = 
         com.pixelmarket.app.data.repository.SalesRepositoryImpl(firestore)
+
+    @Provides
+    @Singleton
+    fun provideCartRepository(
+        firestore: FirebaseFirestore
+    ): com.pixelmarket.app.domain.repository.CartRepository =
+        com.pixelmarket.app.data.repository.CartRepositoryImpl(firestore)
 }

@@ -29,7 +29,7 @@ fun GlassmorphicCard(
     val isDark = isSystemInDarkTheme()
     
     val backgroundColor = if (isDark) GlassBackgroundDark else GlassBackgroundLight
-    val borderColor = if (isDark) GlassBorderDark else GlassBorderLight
+      val borderColor = if (isDark) GlassBorderDark else GlassBorderLight
 
     Box(
         modifier = modifier

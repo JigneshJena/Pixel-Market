@@ -408,14 +408,50 @@ class AdminViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _uiState.value = Resource.Loading()
+                
+                // Fetch and delete all user's assets
+                val assetsSnapshot = firestore.collection("assets")
+                    .whereEqualTo("sellerId", userId)
+                    .get()
+                    .await()
+                
+                for (doc in assetsSnapshot.documents) {
+                    firestore.collection("assets").document(doc.id).delete().await()
+                }
+
                 // delete from users collection
                 firestore.collection("users").document(userId).delete().await()
                 // Soft delete from developers if exists
                 firestore.collection("developers").document(userId).delete()
                 
-                _uiState.value = Resource.Success("User deleted successfully!")
+                _uiState.value = Resource.Success("User and their assets deleted successfully!")
             } catch (e: Exception) {
                 _uiState.value = Resource.Error("Delete Failed: ${e.message}")
+            }
+        }
+    }
+
+    fun toggleUserStatus(userId: String, isActive: Boolean) {
+        viewModelScope.launch {
+            try {
+                _uiState.value = Resource.Loading()
+                firestore.collection("users").document(userId)
+                    .update("isActive", isActive).await()
+                
+                // Update their assets' approved status as well
+                val assetsSnapshot = firestore.collection("assets")
+                    .whereEqualTo("sellerId", userId)
+                    .get()
+                    .await()
+                
+                for (doc in assetsSnapshot.documents) {
+                    firestore.collection("assets").document(doc.id)
+                        .update("approved", isActive).await()
+                }
+
+                _uiState.value = Resource.Success(if (isActive) "User activated successfully!" else "User deactivated successfully!")
+            } catch (e: Exception) {
+                _uiState.value = Resource.Error("Status Update Failed: ${e.message}")
             }
         }
     }

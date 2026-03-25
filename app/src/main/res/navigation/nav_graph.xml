@@ -158,6 +158,13 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_profileFragment_to_developerStatsFragment"
+            app:destination="@id/developerStatsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     
     <fragment
@@ -253,5 +260,11 @@
         android:name="com.pixelmarket.app.presentation.developer.DeveloperRegistrationFragment"
         android:label="Developer Registration"
         tools:layout="@layout/fragment_developer_registration" />
+
+    <fragment
+        android:id="@+id/developerStatsFragment"
+        android:name="com.pixelmarket.app.presentation.developer.DeveloperStatsFragment"
+        android:label="Developer Stats"
+        tools:layout="@layout/fragment_developer_stats" />
 
 </navigation>

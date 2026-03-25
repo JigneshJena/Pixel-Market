@@ -41,8 +41,18 @@ class AdminUsersFragment : Fragment(R.layout.fragment_admin_users) {
             onDeleteClick = { userId -> 
                 com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Delete User?")
-                    .setMessage("Are you sure you want to delete this user? This action cannot be undone.")
+                    .setMessage("Are you sure you want to delete this user and all their assets? This action cannot be undone.")
                     .setPositiveButton("Delete") { _, _ -> viewModel.deleteUser(userId) }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            },
+            onToggleStatusClick = { user ->
+                val action = if (user.isActive) "suspend" else "activate"
+                val message = if (user.isActive) "Suspend this user and hide all their assets?" else "Activate this user and show their assets?"
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("${action.replaceFirstChar { it.uppercase() }} User?")
+                    .setMessage(message)
+                    .setPositiveButton("Yes") { _, _ -> viewModel.toggleUserStatus(user.uid, !user.isActive) }
                     .setNegativeButton("Cancel", null)
                     .show()
             }

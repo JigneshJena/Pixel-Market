@@ -21,6 +21,9 @@ data class User(
     @get:PropertyName("isAdmin")
     @set:PropertyName("isAdmin")
     var isAdmin: Boolean = false,
+    
+    // User active status
+    val isActive: Boolean = true,
 
     // Helper fields to capture different naming conventions in Firestore
     @get:PropertyName("developer")

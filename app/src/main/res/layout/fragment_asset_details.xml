@@ -105,6 +105,8 @@
                 android:src="@drawable/ic_share"
                 app:tint="@color/slate_900" />
         </com.google.android.material.card.MaterialCardView>
+
+
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -550,67 +552,79 @@
                 android:textStyle="bold"
                 android:letterSpacing="0.1" />
 
-            <GridLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:columnCount="2"
-                android:alignmentMode="alignMargins"
-                android:columnOrderPreserved="false"
-                android:useDefaultMargins="true">
+                android:orientation="vertical">
 
-                <!-- Format -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:background="@drawable/glass_panel_rounded"
-                    android:orientation="vertical"
-                    android:padding="14dp">
-                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_layers" app:tint="@color/slate_500" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="FORMAT" android:textColor="@color/slate_500" android:textSize="10sp" android:textStyle="bold" />
-                    <TextView android:id="@+id/tvFormat" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/slate_900" android:textSize="13sp" android:textStyle="bold" tools:text=".FBX, .OBJ" />
+                    android:orientation="horizontal">
+
+                    <!-- Format -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/glass_panel_rounded"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+                        <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_layers" app:tint="@color/slate_500" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="FORMAT" android:textColor="@color/slate_500" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvFormat" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/slate_900" android:textSize="12sp" android:textStyle="bold" tools:text=".FBX, .OBJ" />
+                    </LinearLayout>
+
+                    <!-- File Size -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/glass_panel_rounded"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+                        <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_download" app:tint="@color/slate_500" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="FILE SIZE" android:textColor="@color/slate_500" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvSpecFileSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/slate_900" android:textSize="12sp" android:textStyle="bold" tools:text="48 MB" />
+                    </LinearLayout>
                 </LinearLayout>
 
-                <!-- File Size -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:background="@drawable/glass_panel_rounded"
-                    android:orientation="vertical"
-                    android:padding="14dp">
-                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_download" app:tint="@color/slate_500" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="FILE SIZE" android:textColor="@color/slate_500" android:textSize="10sp" android:textStyle="bold" />
-                    <TextView android:id="@+id/tvSpecFileSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/slate_900" android:textSize="13sp" android:textStyle="bold" tools:text="48 MB" />
-                </LinearLayout>
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
 
-                <!-- Category -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:background="@drawable/glass_panel_rounded"
-                    android:orientation="vertical"
-                    android:padding="14dp">
-                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_market" app:tint="@color/slate_500" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="CATEGORY" android:textColor="@color/slate_500" android:textSize="10sp" android:textStyle="bold" />
-                    <TextView android:id="@+id/tvSpecCategory" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/slate_900" android:textSize="13sp" android:textStyle="bold" tools:text="3D Models" />
-                </LinearLayout>
+                    <!-- Category -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/glass_panel_rounded"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+                        <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_market" app:tint="@color/slate_500" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="CATEGORY" android:textColor="@color/slate_500" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvSpecCategory" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/slate_900" android:textSize="12sp" android:textStyle="bold" tools:text="3D Models" />
+                    </LinearLayout>
 
-                <!-- Reviews -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:background="@drawable/glass_panel_rounded"
-                    android:orientation="vertical"
-                    android:padding="14dp">
-                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_star" app:tint="@color/slate_500" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="REVIEWS" android:textColor="@color/slate_500" android:textSize="10sp" android:textStyle="bold" />
-                    <TextView android:id="@+id/tvReviewCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/slate_900" android:textSize="13sp" android:textStyle="bold" tools:text="128" />
+                    <!-- Reviews -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/glass_panel_rounded"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+                        <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star" app:tint="@color/slate_500" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="REVIEWS" android:textColor="@color/slate_500" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvReviewCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/slate_900" android:textSize="12sp" android:textStyle="bold" tools:text="128" />
+                    </LinearLayout>
                 </LinearLayout>
-            </GridLayout>
+            </LinearLayout>
 
             <!-- ── Creator ── -->
             <TextView

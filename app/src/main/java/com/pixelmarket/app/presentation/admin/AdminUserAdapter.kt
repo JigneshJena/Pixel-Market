@@ -14,7 +14,8 @@ import java.util.Locale
 
 class AdminUserAdapter(
     private val onEditClick: (User) -> Unit,
-    private val onDeleteClick: (String) -> Unit
+    private val onDeleteClick: (String) -> Unit,
+    private val onToggleStatusClick: (User) -> Unit
 ) : ListAdapter<User, AdminUserAdapter.ViewHolder>(DiffCallback()) {
 
     private val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -45,12 +46,26 @@ class AdminUserAdapter(
                 error(com.pixelmarket.app.R.drawable.ic_profile)
             }
             
+            // Handle active/inactive status visuals
+            if (user.isActive) {
+                binding.btnToggleStatus.setImageResource(com.pixelmarket.app.R.drawable.ic_lock) // Or perhaps an unlock icon, up to you. lock normally means "lock this user"
+                binding.btnToggleStatus.setColorFilter(android.graphics.Color.parseColor("#FFA000")) // Warning color
+                binding.root.alpha = 1.0f
+            } else {
+                binding.btnToggleStatus.setImageResource(com.pixelmarket.app.R.drawable.ic_verified) // Some generic indicator for enabling
+                binding.btnToggleStatus.setColorFilter(android.graphics.Color.parseColor("#388E3C")) // Green
+                binding.root.alpha = 0.6f // Disable visually
+            }
+
             binding.btnEdit.setOnClickListener { onEditClick(user) }
             binding.btnDelete.setOnClickListener { onDeleteClick(user.uid) }
+            binding.btnToggleStatus.setOnClickListener { onToggleStatusClick(user) }
             
-            // Hide delete/edit if it's the admin itself
-            binding.btnDelete.visibility = if (user.role == "admin") View.GONE else View.VISIBLE
-            binding.btnEdit.visibility = if (user.role == "admin") View.GONE else View.VISIBLE
+            // Hide delete/edit/status if it's the admin itself
+            val isEditingSelf = user.role == "admin"
+            binding.btnDelete.visibility = if (isEditingSelf) View.GONE else View.VISIBLE
+            binding.btnEdit.visibility = if (isEditingSelf) View.GONE else View.VISIBLE
+            binding.btnToggleStatus.visibility = if (isEditingSelf) View.GONE else View.VISIBLE
         }
     }
 

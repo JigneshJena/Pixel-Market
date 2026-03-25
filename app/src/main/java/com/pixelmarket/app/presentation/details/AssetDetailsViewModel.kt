@@ -59,6 +59,9 @@ class AssetDetailsViewModel @Inject constructor(
     private val _ratingSuccessEvent = Channel<Unit>(Channel.BUFFERED)
     val ratingSuccessEvent: Flow<Unit> = _ratingSuccessEvent.receiveAsFlow()
 
+    private val _deleteEvent = Channel<String>(Channel.BUFFERED)
+    val deleteEvent: Flow<String> = _deleteEvent.receiveAsFlow()
+
     // Cart state
     private val _isInCart = MutableStateFlow(false)
     val isInCart: StateFlow<Boolean> = _isInCart
@@ -343,6 +346,19 @@ class AssetDetailsViewModel @Inject constructor(
                 _purchaseState.value = PurchaseState.Success(downloadUrl)
             } catch (e: Exception) {
                 _purchaseState.value = PurchaseState.Error(e.message ?: "Download failed")
+            }
+        }
+    }
+
+    fun deleteAsset() {
+        val assetId = currentAssetId.ifEmpty { return }
+        viewModelScope.launch {
+            assetRepository.deleteAsset(assetId).collect { result ->
+                if (result is Resource.Success) {
+                    _deleteEvent.trySend("success")
+                } else if (result is Resource.Error) {
+                    _deleteEvent.trySend("error:${result.message}")
+                }
             }
         }
     }

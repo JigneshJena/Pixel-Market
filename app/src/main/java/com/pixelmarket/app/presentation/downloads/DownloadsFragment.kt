@@ -11,6 +11,7 @@ import android.widget.Toast
 import com.pixelmarket.app.R
 import com.pixelmarket.app.databinding.FragmentDownloadsBinding
 import com.pixelmarket.app.presentation.home.AssetGridAdapter
+import com.pixelmarket.app.domain.model.Asset
 import com.pixelmarket.app.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -35,9 +36,18 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
         setupRecyclerViews()
         observeViewModel()
 
+        arguments?.getString("screenTitle")?.let { title ->
+            binding.tvTopHeader.text = title
+        }
+
+        val isDeveloperAssetsMode = arguments?.getBoolean("showDeveloperAssets", false) == true
+        if (isDeveloperAssetsMode) {
+            viewModel.loadDeveloperAssets()
+            binding.tvLibraryHeader.text = "MY UPLOADED ASSETS"
+        }
+
         arguments?.getBoolean("scrollToCart", false)?.let { shouldScroll ->
             if (shouldScroll) {
-                binding.tvTopHeader.text = "MY SHOPPING CART"
                 binding.scrollView.post {
                     binding.scrollView.smoothScrollTo(0, binding.sectionCart.top)
                 }
@@ -88,6 +98,8 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
     }
 
     private fun observeViewModel() {
+        val isDeveloperAssetsMode = arguments?.getBoolean("showDeveloperAssets", false) == true
+
         // Active Downloads
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.downloads.collectLatest { list ->
@@ -136,69 +148,47 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
             }
         }
 
-        // Purchased Assets Library
+        // Purchased Assets Library (or Developer Assets)
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.purchasedAssets.collectLatest { resource ->
-                when (resource) {
-                    is Resource.Success -> {
-                        val list = resource.data ?: emptyList()
-                        libraryAdapter.submitList(list)
-                        binding.tvLibraryHeader.isVisible = list.isNotEmpty()
-                        binding.rvLibrary.isVisible = list.isNotEmpty()
-                        updateEmptyState()
-                    }
-                    is Resource.Error -> {
-                        // Silently ignore errors (e.g. Firestore permission denied).
-                        // Show an empty list — never expose raw error messages.
-                        libraryAdapter.submitList(emptyList())
-                        binding.tvLibraryHeader.isVisible = false
-                        binding.rvLibrary.isVisible = false
-                        updateEmptyState()
-                    }
-                    is Resource.Loading -> {
-                        // loading
-                    }
+            if (isDeveloperAssetsMode) {
+                viewModel.developerAssets.collectLatest { resource ->
+                    handleAssetListUpdate(resource)
                 }
-            }
-        }
-
-        // Download History
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.downloadHistory.collectLatest { resource ->
-                when (resource) {
-                    is Resource.Success -> {
-                        val list = resource.data ?: emptyList()
-                        downloadHistoryAdapter.submitList(list)
-                        binding.tvDownloadHistoryHeader.isVisible = list.isNotEmpty()
-                        binding.rvDownloadHistory.isVisible = list.isNotEmpty()
-
-                        // Show empty state only when library, history and cart are empty
-                        val hasNoData = list.isEmpty() &&
-                            (viewModel.purchasedAssets.value as? Resource.Success)?.data.isNullOrEmpty() &&
-                            viewModel.cartItems.value.isEmpty()
-                        binding.tvEmpty.isVisible = hasNoData
-                    }
-                    is Resource.Error -> {
-                        // Silently ignore (e.g. Firestore permission denied).
-                        // Still check if there is any library content visible.
-                        downloadHistoryAdapter.submitList(emptyList())
-                        binding.tvDownloadHistoryHeader.isVisible = false
-                        binding.rvDownloadHistory.isVisible = false
-                        val hasLibrary = (viewModel.purchasedAssets.value as? Resource.Success)?.data.isNullOrEmpty() == false
-                        binding.tvEmpty.isVisible = !hasLibrary && viewModel.cartItems.value.isEmpty()
-                    }
-                    is Resource.Loading -> {
-                        // loading
-                    }
+            } else {
+                viewModel.purchasedAssets.collectLatest { resource ->
+                    handleAssetListUpdate(resource)
                 }
             }
         }
     }
 
+    private fun handleAssetListUpdate(resource: Resource<List<Asset>>) {
+        when (resource) {
+            is Resource.Success -> {
+                val list = resource.data ?: emptyList()
+                libraryAdapter.submitList(list)
+                binding.tvLibraryHeader.isVisible = list.isNotEmpty()
+                binding.rvLibrary.isVisible = list.isNotEmpty()
+                updateEmptyState()
+            }
+            is Resource.Error -> {
+                libraryAdapter.submitList(emptyList())
+                binding.tvLibraryHeader.isVisible = false
+                binding.rvLibrary.isVisible = false
+                updateEmptyState()
+            }
+            is Resource.Loading -> {}
+        }
+    }
+
     private fun updateEmptyState() {
         val cartEmpty = viewModel.cartItems.value.isEmpty()
-        val libraryEmpty = (viewModel.purchasedAssets.value as? Resource.Success)?.data.isNullOrEmpty()
-        val showEmpty = cartEmpty && libraryEmpty
+        val purchasedEmpty = (viewModel.purchasedAssets.value as? Resource.Success)?.data.isNullOrEmpty()
+        val developerEmpty = (viewModel.developerAssets.value as? Resource.Success)?.data.isNullOrEmpty()
+        
+        val isDevMode = arguments?.getBoolean("showDeveloperAssets", false) == true
+        val showEmpty = if (isDevMode) developerEmpty else (cartEmpty && purchasedEmpty)
+        
         binding.tvEmpty.isVisible = showEmpty
         binding.btnBrowseMarket.isVisible = showEmpty
     }

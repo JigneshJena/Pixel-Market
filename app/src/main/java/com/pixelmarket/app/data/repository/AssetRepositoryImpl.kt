@@ -31,6 +31,7 @@ class AssetRepositoryImpl @Inject constructor(
         trySend(Resource.Loading())
         val registration = firestore.collection("assets")
             .whereEqualTo("featured", true)
+            .whereEqualTo("approved", true) // Ensure only approved featured assets are shown
             .limit(10)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
@@ -46,6 +47,7 @@ class AssetRepositoryImpl @Inject constructor(
     override fun getTrendingAssets(): Flow<Resource<List<Asset>>> = callbackFlow {
         trySend(Resource.Loading())
         val registration = firestore.collection("assets")
+            .whereEqualTo("approved", true) // Ensure only approved assets are shown in trending
             .orderBy("downloadCount", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .limit(15)
             .addSnapshotListener { snapshot, error ->
@@ -62,6 +64,7 @@ class AssetRepositoryImpl @Inject constructor(
     override fun getNewReleases(): Flow<Resource<List<Asset>>> = callbackFlow {
         trySend(Resource.Loading())
         val registration = firestore.collection("assets")
+            .whereEqualTo("approved", true) // Ensure only approved assets are shown in new releases
             .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .limit(20)
             .addSnapshotListener { snapshot, error ->
@@ -78,6 +81,7 @@ class AssetRepositoryImpl @Inject constructor(
     override fun searchAssets(query: String, category: String?): Flow<Resource<List<Asset>>> = callbackFlow {
         trySend(Resource.Loading())
         var firestoreQuery: com.google.firebase.firestore.Query = firestore.collection("assets")
+            .whereEqualTo("approved", true) // Only search within approved assets
         
         if (category != null && category != "All") {
             firestoreQuery = firestoreQuery.whereEqualTo("category", category)

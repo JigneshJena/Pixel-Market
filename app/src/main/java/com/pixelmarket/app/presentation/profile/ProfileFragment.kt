@@ -1,8 +1,10 @@
 package com.pixelmarket.app.presentation.profile
 
 import android.content.DialogInterface
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -59,11 +61,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val themeManager = ThemeManager(requireContext())
         updateThemeIcon(themeManager.isDarkMode())
 
-        binding.menuCart.title.text = "My Shopping Cart"
-        binding.menuCart.icon.setImageResource(R.drawable.ic_shopping_cart)
-
-        binding.menuPurchases.title.text = "My Library & Purchases"
-        binding.menuPurchases.icon.setImageResource(R.drawable.ic_layers)
+        binding.menuAccount.title.text = "Profile Settings"
+        binding.menuCart.title.text = "Purchase History"
+        binding.menuPurchases.title.text = "My Assets Library"
+        binding.menuWallet.title.text = "Wallet & Payments"
+        binding.menuDeveloperAssets.title.text = "Manage My Uploads"
+        binding.menuDeveloperDashboard.title.text = "Earnings & Stats"
 
 
         binding.btnThemeToggle.setOnClickListener {
@@ -92,8 +95,23 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         binding.root.findViewById<android.view.View>(R.id.menuCart)?.setOnClickListener {
-            val bundle = Bundle().apply { putBoolean("scrollToCart", true) }
+            val bundle = Bundle().apply { 
+                putBoolean("scrollToCart", true) 
+                putString("screenTitle", "MY ORDERS")
+            }
             findNavController().navigate(R.id.downloadsFragment, bundle)
+        }
+
+        binding.menuDeveloperAssets.root.setOnClickListener {
+            val bundle = Bundle().apply { 
+                putBoolean("showDeveloperAssets", true)
+                putString("screenTitle", "MY UPLOADS")
+            }
+            findNavController().navigate(R.id.downloadsFragment, bundle)
+        }
+
+        binding.menuDeveloperDashboard.root.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_developerStatsFragment)
         }
     }
 
@@ -141,7 +159,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 if (hasDevAccess) {
                     b.btnUpgradeToDeveloper.visibility = View.GONE
                     b.developerBadge.visibility = View.VISIBLE
-                    b.tvDeveloperBadge.text = if (isAdmin || role == "admin" || legacyAdmin) "Admin" else "Developer"
+                    b.tvDeveloperBadge.text = if (isAdmin || role == "admin" || legacyAdmin) "ADMIN • CORE" else "DEVELOPER • PRO"
+                    b.tvDeveloperBadge.setTextColor(if (isAdmin || role == "admin" || legacyAdmin) ContextCompat.getColor(requireContext(), R.color.rose_500) else ContextCompat.getColor(requireContext(), R.color.white))
 
                     // ── Show Developer Earnings card ──────────────────────────
                     b.developerEarningsCard.visibility = View.VISIBLE
@@ -151,6 +170,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                     b.tvTotalEarnings.text    = "₹${String.format("%.2f", totalEarnings)}"
                     b.tvAvailableBalance.text = "₹${String.format("%.2f", availableBalance)}"
                     b.tvTotalSales.text       = totalSales.toString()
+
+                    // Show Developer Menus
+                    b.menuDeveloperAssets.root.visibility = View.VISIBLE
+                    b.menuDeveloperDashboard.root.visibility = View.VISIBLE
 
                 } else {
                     b.btnUpgradeToDeveloper.visibility = View.VISIBLE

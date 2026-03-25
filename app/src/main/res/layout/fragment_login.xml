@@ -69,7 +69,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:hintEnabled="false"
-                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundColor="#F1F5F9"
                 app:boxStrokeColor="@color/slate_200"
                 app:boxStrokeWidth="1dp"
                 app:boxStrokeWidthFocused="1dp"
@@ -79,10 +79,7 @@
                 app:boxCornerRadiusBottomEnd="14dp"
                 app:startIconDrawable="@drawable/ic_email"
                 app:startIconTint="#6366F1"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:elevation="0dp"
-                android:outlineProvider="none"
-                android:stateListAnimator="@null">
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEmail"
@@ -90,7 +87,7 @@
                     android:layout_height="56dp"
                     android:background="@null"
                     android:hint="you@example.com"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/slate_900"
                     android:textColorHint="@color/text_muted"
                     android:textSize="15sp"
                     android:inputType="textEmailAddress"
@@ -113,7 +110,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:hintEnabled="false"
-                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundColor="#F1F5F9"
                 app:boxStrokeColor="@color/slate_200"
                 app:boxStrokeWidth="1dp"
                 app:boxStrokeWidthFocused="1dp"
@@ -125,10 +122,7 @@
                 app:startIconTint="#6366F1"
                 app:endIconMode="password_toggle"
                 app:endIconTint="#606888"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:elevation="0dp"
-                android:outlineProvider="none"
-                android:stateListAnimator="@null">
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
@@ -136,7 +130,7 @@
                     android:layout_height="56dp"
                     android:background="@null"
                     android:hint="Enter password"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/slate_900"
                     android:textColorHint="@color/text_muted"
                     android:textSize="15sp"
                     android:inputType="textPassword"

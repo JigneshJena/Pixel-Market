@@ -46,6 +46,9 @@ class DownloadsViewModel @Inject constructor(
     private val _downloadHistory = MutableStateFlow<Resource<List<Download>>>(Resource.Loading())
     val downloadHistory: StateFlow<Resource<List<Download>>> = _downloadHistory
 
+    private val _developerAssets = MutableStateFlow<Resource<List<Asset>>>(Resource.Success(emptyList()))
+    val developerAssets: StateFlow<Resource<List<Asset>>> = _developerAssets
+
     private val _checkoutStatus = MutableStateFlow<Resource<Unit>?>(null)
     val checkoutStatus: StateFlow<Resource<Unit>?> = _checkoutStatus
 
@@ -143,6 +146,17 @@ class DownloadsViewModel @Inject constructor(
         viewModelScope.launch {
             assetRepository.getUserDownloads(userId).collect { result ->
                 _downloadHistory.value = result
+            }
+        }
+    }
+
+    fun loadDeveloperAssets() {
+        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid 
+            ?: return
+        
+        viewModelScope.launch {
+            assetRepository.getUserAssets(userId).collect { result ->
+                _developerAssets.value = result
             }
         }
     }

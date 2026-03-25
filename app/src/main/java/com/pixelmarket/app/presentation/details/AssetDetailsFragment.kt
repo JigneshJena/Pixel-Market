@@ -138,6 +138,8 @@ class AssetDetailsFragment : Fragment(R.layout.fragment_asset_details), PaymentR
                 showCreatorBottomSheet(asset)
             }
         }
+
+
     }
 
     private fun showCreatorBottomSheet(asset: Asset) {
@@ -268,6 +270,18 @@ class AssetDetailsFragment : Fragment(R.layout.fragment_asset_details), PaymentR
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.deleteEvent.collectLatest { event ->
+                if (_binding == null) return@collectLatest
+                if (event == "success") {
+                    Toast.makeText(requireContext(), "Asset deleted successfully", Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
+                } else if (event.startsWith("error:")) {
+                    Toast.makeText(requireContext(), event.substringAfter("error:"), Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isInCart.collectLatest { inCart ->
                 val b = _binding ?: return@collectLatest
                 // Tint icon green when in cart, primary color otherwise
@@ -322,6 +336,8 @@ class AssetDetailsFragment : Fragment(R.layout.fragment_asset_details), PaymentR
 
         // Description
         binding.tvDescription.text = asset.description.ifBlank { "No description provided." }
+
+
 
         // Metrics (Real-time synced via Snapshot Listener)
         binding.tvRating.text = if (asset.rating > 0) String.format("%.1f", asset.rating) else "—"

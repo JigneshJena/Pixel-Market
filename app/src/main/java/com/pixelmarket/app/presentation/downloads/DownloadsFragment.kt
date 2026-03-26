@@ -8,6 +8,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import android.widget.Toast
+import com.google.android.material.tabs.TabLayout
 import com.pixelmarket.app.R
 import com.pixelmarket.app.databinding.FragmentDownloadsBinding
 import com.pixelmarket.app.presentation.home.AssetGridAdapter
@@ -26,6 +27,7 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
     private val viewModel: DownloadsViewModel by viewModels()
     private lateinit var downloadsAdapter: DownloadsAdapter
     private lateinit var libraryAdapter: AssetGridAdapter
+    private lateinit var uploadsAdapter: AssetGridAdapter
     private lateinit var downloadHistoryAdapter: DownloadHistoryAdapter
     private lateinit var cartAdapter: CartAdapter
 
@@ -34,17 +36,25 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
         _binding = FragmentDownloadsBinding.bind(view)
 
         setupRecyclerViews()
+        setupTabs()
         observeViewModel()
 
         arguments?.getString("screenTitle")?.let { title ->
+            // Keep the custom title if passed
             binding.tvTopHeader.text = title
         }
 
         val isDeveloperAssetsMode = arguments?.getBoolean("showDeveloperAssets", false) == true
         if (isDeveloperAssetsMode) {
-            viewModel.loadDeveloperAssets()
-            binding.tvLibraryHeader.text = "MY UPLOADED ASSETS"
+            // Select "My Uploads" tab automatically
+            binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
+            showUploadsTab()
+        } else {
+            showPurchasedTab()
         }
+
+        // Always trigger loading developers assets so they are ready
+        viewModel.loadDeveloperAssets()
 
         arguments?.getBoolean("scrollToCart", false)?.let { shouldScroll ->
             if (shouldScroll) {
@@ -53,6 +63,31 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
                 }
             }
         }
+    }
+
+    private fun setupTabs() {
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                when (tab?.position) {
+                    0 -> showPurchasedTab()
+                    1 -> showUploadsTab()
+                }
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
+    }
+
+    private fun showPurchasedTab() {
+        binding.scrollView.isVisible = true
+        binding.scrollViewUploads.isVisible = false
+        updateCheckoutBarVisibility()
+    }
+
+    private fun showUploadsTab() {
+        binding.scrollView.isVisible = false
+        binding.scrollViewUploads.isVisible = true
+        updateCheckoutBarVisibility()
     }
 
     private fun setupRecyclerViews() {
@@ -74,12 +109,19 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
         }
         binding.rvDownloads.adapter = downloadsAdapter
 
-        // Purchased Library
+        // Purchased Library Grid
         libraryAdapter = AssetGridAdapter { assetId ->
             val action = DownloadsFragmentDirections.actionDownloadsFragmentToAssetDetailsFragment(assetId)
             findNavController().navigate(action)
         }
         binding.rvLibrary.adapter = libraryAdapter
+
+        // My Uploads Grid
+        uploadsAdapter = AssetGridAdapter { assetId ->
+            val action = DownloadsFragmentDirections.actionDownloadsFragmentToAssetDetailsFragment(assetId)
+            findNavController().navigate(action)
+        }
+        binding.rvUploads.adapter = uploadsAdapter
 
         // Download History
         downloadHistoryAdapter = DownloadHistoryAdapter { assetId ->
@@ -98,8 +140,6 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
     }
 
     private fun observeViewModel() {
-        val isDeveloperAssetsMode = arguments?.getBoolean("showDeveloperAssets", false) == true
-
         // Active Downloads
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.downloads.collectLatest { list ->
@@ -115,16 +155,15 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
             viewModel.cartItems.collectLatest { list ->
                 cartAdapter.submitList(list)
                 binding.sectionCart.isVisible = list.isNotEmpty()
+                updateCheckoutBarVisibility()
                 
-                // Update Sticky Checkout Bar
-                binding.layoutCheckoutBar.isVisible = list.isNotEmpty()
                 if (list.isNotEmpty()) {
                     binding.tvCartCount.text = "${list.size} ${if (list.size == 1) "Item" else "Items"} in Cart"
                     val total = list.sumOf { it.price }
                     binding.tvCartTotal.text = "₹${String.format("%.2f", total)}"
                 }
                 
-                updateEmptyState()
+                updatePurchasedEmptyState()
             }
         }
 
@@ -140,57 +179,67 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
                         Toast.makeText(requireContext(), resource.message, Toast.LENGTH_LONG).show()
                         viewModel.resetCheckoutStatus()
                     }
-                    is Resource.Loading -> {
-                        // could show a progress dialog here
-                    }
+                    is Resource.Loading -> { }
                     else -> {}
                 }
             }
         }
 
-        // Purchased Assets Library (or Developer Assets)
+        // Purchased Assets
         viewLifecycleOwner.lifecycleScope.launch {
-            if (isDeveloperAssetsMode) {
-                viewModel.developerAssets.collectLatest { resource ->
-                    handleAssetListUpdate(resource)
+            viewModel.purchasedAssets.collectLatest { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        val list = resource.data ?: emptyList()
+                        libraryAdapter.submitList(list)
+                        binding.tvLibraryHeader.isVisible = list.isNotEmpty()
+                        binding.rvLibrary.isVisible = list.isNotEmpty()
+                        updatePurchasedEmptyState()
+                    }
+                    is Resource.Error -> {
+                        libraryAdapter.submitList(emptyList())
+                        binding.tvLibraryHeader.isVisible = false
+                        binding.rvLibrary.isVisible = false
+                        updatePurchasedEmptyState()
+                    }
+                    is Resource.Loading -> {}
                 }
-            } else {
-                viewModel.purchasedAssets.collectLatest { resource ->
-                    handleAssetListUpdate(resource)
+            }
+        }
+
+        // Uploaded (Developer) Assets
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.developerAssets.collectLatest { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        val list = resource.data ?: emptyList()
+                        uploadsAdapter.submitList(list)
+                        val isEmpty = list.isEmpty()
+                        binding.tvEmptyUploads.isVisible = isEmpty
+                        binding.rvUploads.isVisible = !isEmpty
+                    }
+                    is Resource.Error -> {
+                        uploadsAdapter.submitList(emptyList())
+                        binding.tvEmptyUploads.isVisible = true
+                        binding.rvUploads.isVisible = false
+                    }
+                    is Resource.Loading -> {}
                 }
             }
         }
     }
 
-    private fun handleAssetListUpdate(resource: Resource<List<Asset>>) {
-        when (resource) {
-            is Resource.Success -> {
-                val list = resource.data ?: emptyList()
-                libraryAdapter.submitList(list)
-                binding.tvLibraryHeader.isVisible = list.isNotEmpty()
-                binding.rvLibrary.isVisible = list.isNotEmpty()
-                updateEmptyState()
-            }
-            is Resource.Error -> {
-                libraryAdapter.submitList(emptyList())
-                binding.tvLibraryHeader.isVisible = false
-                binding.rvLibrary.isVisible = false
-                updateEmptyState()
-            }
-            is Resource.Loading -> {}
-        }
-    }
-
-    private fun updateEmptyState() {
+    private fun updatePurchasedEmptyState() {
         val cartEmpty = viewModel.cartItems.value.isEmpty()
         val purchasedEmpty = (viewModel.purchasedAssets.value as? Resource.Success)?.data.isNullOrEmpty()
-        val developerEmpty = (viewModel.developerAssets.value as? Resource.Success)?.data.isNullOrEmpty()
-        
-        val isDevMode = arguments?.getBoolean("showDeveloperAssets", false) == true
-        val showEmpty = if (isDevMode) developerEmpty else (cartEmpty && purchasedEmpty)
-        
+        val showEmpty = cartEmpty && purchasedEmpty
         binding.tvEmpty.isVisible = showEmpty
-        binding.btnBrowseMarket.isVisible = showEmpty
+    }
+
+    private fun updateCheckoutBarVisibility() {
+        val isPurchasedTabActive = binding.tabLayout.selectedTabPosition == 0
+        val hasCartItems = viewModel.cartItems.value.isNotEmpty()
+        binding.layoutCheckoutBar.isVisible = isPurchasedTabActive && hasCartItems
     }
 
     override fun onDestroyView() {
@@ -198,4 +247,3 @@ class DownloadsFragment : Fragment(R.layout.fragment_downloads) {
         _binding = null
     }
 }
-

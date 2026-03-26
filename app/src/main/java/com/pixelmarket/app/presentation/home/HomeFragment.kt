@@ -28,7 +28,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val viewModel: AssetViewModel by viewModels()
 
     private lateinit var trendingStoryAdapter: TrendingStoryAdapter
-    private lateinit var newReleasesAdapter: AssetAdapter
+    private lateinit var newReleasesAdapter: AssetGridAdapter
     private lateinit var searchResultsAdapter: FullAssetAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,7 +48,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.rvTrending.adapter = trendingStoryAdapter
 
         // New releases horizontal cards
-        newReleasesAdapter = AssetAdapter { id -> navigateToDetails(id) }
+        newReleasesAdapter = AssetGridAdapter { id -> navigateToDetails(id) }
         binding.rvNewReleases.adapter = newReleasesAdapter
 
         // Inline search results grid

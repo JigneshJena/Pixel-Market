@@ -139,7 +139,13 @@ class AssetDetailsFragment : Fragment(R.layout.fragment_asset_details), PaymentR
             }
         }
 
-
+        // Edit button — navigate to UploadFragment in edit mode (owner only)
+        binding.btnEditAsset.setOnClickListener {
+            val bundle = android.os.Bundle().apply {
+                putString("editAssetId", args.assetId)
+            }
+            findNavController().navigate(R.id.action_assetDetailsFragment_to_uploadFragment, bundle)
+        }
     }
 
     private fun showCreatorBottomSheet(asset: Asset) {
@@ -153,12 +159,16 @@ class AssetDetailsFragment : Fragment(R.layout.fragment_asset_details), PaymentR
         val tvRating = view.findViewById<android.widget.TextView>(R.id.tvCreatorSheetRating)
         val btnClose = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCloseCreatorSheet)
 
-        tvName.text = asset.sellerName.ifBlank { "Anonymous Creator" }
-        tvAssets.text = asset.sellerAssetCount.toString()
-        tvRating.text = if (asset.sellerRating > 0) String.format("%.1f ★", asset.sellerRating) else "Unrated"
+        val seller = viewModel.sellerProfile.value
+        val sellerName = seller?.username?.ifBlank { seller.email?.substringBefore("@") } ?: asset.sellerName.ifBlank { "Anonymous Creator" }
+        tvName.text = sellerName
+        tvAssets.text = "${seller?.assetsUploaded ?: asset.sellerAssetCount} Assets"
+        val rating = seller?.rating ?: asset.sellerRating
+        tvRating.text = if (rating > 0) String.format("%.1f ★", rating) else "Unrated"
 
-        if (!asset.sellerAvatarUrl.isNullOrBlank()) {
-            ivCreator.load(asset.sellerAvatarUrl) { crossfade(true) }
+        val avatar = seller?.profileImageUrl ?: asset.sellerAvatarUrl
+        if (!avatar.isNullOrBlank()) {
+            ivCreator.load(avatar) { crossfade(true) }
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
@@ -183,6 +193,21 @@ class AssetDetailsFragment : Fragment(R.layout.fragment_asset_details), PaymentR
                 // Hide cart icon when user already owns the asset
                 b.btnAddToCart.isVisible = !it
                 updateRatingVisibility()
+            }
+        }
+
+        // Owner check — swap Buy for Edit button
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isOwnAsset.collectLatest { isOwner ->
+                val b = _binding ?: return@collectLatest
+                b.btnBuy.isVisible = !isOwner
+                b.btnAddToCart.isVisible = !isOwner && !viewModel.isPurchased.value
+                b.btnEditAsset.isVisible = isOwner
+                // Owners don't rate their own asset
+                if (isOwner) {
+                    b.containerRating.isVisible = false
+                    b.tvRatingLocked.isVisible = false
+                }
             }
         }
 
@@ -216,6 +241,41 @@ class AssetDetailsFragment : Fragment(R.layout.fragment_asset_details), PaymentR
                     is Resource.Success -> bindAsset(resource.data ?: return@collectLatest)
                     is Resource.Loading -> { /* optionally show shimmer */ }
                     is Resource.Error -> { /* silently handle */ }
+                }
+            }
+        }
+
+        // Live seller info overrides
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.sellerProfile.collectLatest { seller ->
+                val b = _binding ?: return@collectLatest
+                if (seller != null) {
+                    val fallbackName = viewModel.asset.value.data?.sellerName ?: "Anonymous"
+                    b.tvSeller.text = seller.username.ifBlank { seller.email.substringBefore("@") }.ifBlank { fallbackName }
+
+                    val roleLabel = if (seller.isAdmin || seller.legacyAdmin || seller.role == "admin") "Admin on PixelMarket"
+                                    else if (seller.isDeveloper || seller.legacyDeveloper || seller.role == "seller" || seller.role == "developer") "Developer on PixelMarket"
+                                    else "Creator on PixelMarket"
+                    
+                    val stats = buildString {
+                        if (seller.assetsUploaded > 0) append("${seller.assetsUploaded} Assets")
+                        if (seller.rating > 0) {
+                            if (isNotEmpty()) append("  •  ")
+                            append(String.format("%.1f", seller.rating)).append(" ★")
+                        }
+                        if (isEmpty()) append(roleLabel)
+                    }
+                    b.tvCreatorStats.text = stats
+
+                    if (!seller.profileImageUrl.isNullOrBlank()) {
+                        b.ivCreator.load(seller.profileImageUrl) { 
+                            crossfade(true)
+                            placeholder(R.drawable.ic_profile)
+                            error(R.drawable.ic_profile)
+                        }
+                    } else {
+                        b.ivCreator.setImageResource(R.drawable.ic_profile)
+                    }
                 }
             }
         }

@@ -53,17 +53,39 @@ class MarketplaceViewModel @Inject constructor(
     fun filterByCategory(category: String) {
         _selectedCategory.value = category
         if (_searchQuery.value.isBlank()) {
-            if (category == "All") {
-                loadAllAssets()
-            } else {
-                viewModelScope.launch {
-                    assetRepository.searchAssets("", category).collect { result ->
-                        _assets.value = result
+            when (category) {
+                "All" -> loadAllAssets()
+                "Others" -> loadOthersCategory()
+                else -> {
+                    viewModelScope.launch {
+                        assetRepository.searchAssets("", category).collect { result ->
+                            _assets.value = result
+                        }
                     }
                 }
             }
         } else {
             searchAssets(_searchQuery.value)
+        }
+    }
+
+    private fun loadOthersCategory() {
+        val mainCategories = setOf(
+            "3D Models", "Textures", "UI Kits", "Scripts",
+            "Animations", "Animation", "Music", "Audio"
+        )
+        viewModelScope.launch {
+            assetRepository.getAllAssets().collect { result ->
+                if (result is Resource.Success) {
+                    val filtered = result.data?.filter { asset ->
+                        asset.category.isNotBlank() &&
+                            !mainCategories.any { it.equals(asset.category, ignoreCase = true) }
+                    } ?: emptyList()
+                    _assets.value = Resource.Success(filtered)
+                } else {
+                    _assets.value = result
+                }
+            }
         }
     }
 

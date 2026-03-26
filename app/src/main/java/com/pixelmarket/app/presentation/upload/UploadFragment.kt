@@ -67,6 +67,13 @@ class UploadFragment : Fragment(R.layout.fragment_upload) {
 
         observeViewModel()
         startEntranceAnimations()
+
+        // Check for edit mode
+        arguments?.getString("editAssetId")?.takeIf { it.isNotBlank() }?.let { editAssetId ->
+            binding.tvScreenTitle.text = "EDIT ASSET"
+            binding.btnPublish.text = "Update Asset"
+            viewModel.initEditMode(editAssetId)
+        }
     }
 
     private fun startEntranceAnimations() {
@@ -88,6 +95,21 @@ class UploadFragment : Fragment(R.layout.fragment_upload) {
     }
 
     private fun observeViewModel() {
+        // Prefill existing data in Edit Mode
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.initialEditData.collectLatest { asset ->
+                val b = _binding ?: return@collectLatest
+                if (asset != null) {
+                    if (b.etTitle.text.isNullOrBlank()) {
+                        b.etTitle.setText(asset.title)
+                        b.etDescription.setText(asset.description)
+                        b.etCategory.setText(asset.category)
+                        b.etPrice.setText(asset.price.toString())
+                    }
+                }
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.thumbnailUrl.collectLatest { url ->
                 val b = _binding ?: return@collectLatest

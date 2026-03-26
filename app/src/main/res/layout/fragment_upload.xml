@@ -41,6 +41,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:id="@+id/tvScreenTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -250,7 +251,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
                 app:cardBackgroundColor="@color/glass_surface"
-                app:cardCornerRadius="28dp"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:strokeColor="@color/glass_border"
                 app:strokeWidth="1.5dp">
@@ -327,7 +328,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/glass_surface"
-                app:cardCornerRadius="20dp"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:strokeColor="@color/glass_border"
                 app:strokeWidth="1dp">
@@ -393,7 +394,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 app:cardBackgroundColor="@color/glass_surface"
-                app:cardCornerRadius="20dp"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:strokeColor="@color/glass_border"
                 app:strokeWidth="1dp">

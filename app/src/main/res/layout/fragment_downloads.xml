@@ -5,8 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Content Area -->
-
     <!-- Top Bar -->
     <LinearLayout
         android:id="@+id/topBar"
@@ -49,84 +47,106 @@
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
+    <!-- Tab Bar -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        app:tabIndicatorColor="@color/primary"
+        app:tabIndicatorHeight="3dp"
+        app:tabSelectedTextColor="@color/primary"
+        app:tabTextColor="@color/text_secondary"
+        app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Purchased" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="My Uploads" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- Active Downloads Section (always visible, floats above tabs content) -->
+    <LinearLayout
+        android:id="@+id/sectionActive"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="8dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tabLayout">
+
+        <TextView
+            android:id="@+id/tvActiveDownloadsHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ACTIVE DOWNLOADS"
+            android:textColor="@color/text_muted"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvDownloads"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/glass_panel_rounded"
+            android:nestedScrollingEnabled="false"
+            android:padding="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_download" />
+    </LinearLayout>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   TAB 0: Purchased Assets                          -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:paddingBottom="@dimen/content_padding_bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topBar">
+        app:layout_constraintBottom_toTopOf="@id/layoutCheckoutBar"
+        app:layout_constraintTop_toBottomOf="@id/sectionActive">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
-            android:paddingTop="24dp">
-
-            <!-- Active Downloads Section -->
-            <LinearLayout
-                android:id="@+id/sectionActive"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/tvActiveDownloadsHeader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ACTIVE DOWNLOADS"
-                    android:textColor="@color/text_muted"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvDownloads"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:background="@drawable/glass_panel_rounded"
-                    android:nestedScrollingEnabled="false"
-                    android:padding="8dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/item_download" />
-            </LinearLayout>
+            android:paddingTop="16dp">
 
             <!-- Shopping Cart Section -->
             <LinearLayout
                 android:id="@+id/sectionCart"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
                 android:orientation="vertical"
                 android:visibility="gone"
                 tools:visibility="visible">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/tvCartHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tvCartHeader"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="MY SHOPPING CART"
-                        android:textColor="@color/text_muted"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.1" />
-                </LinearLayout>
+                    android:text="MY SHOPPING CART"
+                    android:textColor="@color/text_muted"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvCart"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="12dp"
                     android:clipToPadding="false"
                     android:nestedScrollingEnabled="false"
                     android:orientation="horizontal"
@@ -134,35 +154,37 @@
                     tools:listitem="@layout/item_asset_small" />
             </LinearLayout>
 
-            <!-- Purchased Assets Section -->
+            <!-- Purchased Assets Grid -->
             <TextView
                 android:id="@+id/tvLibraryHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="24dp"
                 android:text="PURCHASED ASSETS"
                 android:textColor="@color/text_muted"
                 android:textSize="11sp"
                 android:textStyle="bold"
-                android:letterSpacing="0.1" />
+                android:letterSpacing="0.1"
+                android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvLibrary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="2"
+                android:visibility="gone"
                 tools:listitem="@layout/item_asset_small" />
 
-            <!-- Recent History Section -->
+            <!-- Download History -->
             <LinearLayout
                 android:id="@+id/sectionHistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="24dp"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -180,7 +202,7 @@
                     android:id="@+id/rvDownloadHistory"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="12dp"
                     android:background="@drawable/glass_panel_rounded"
                     android:nestedScrollingEnabled="false"
                     android:padding="8dp"
@@ -188,12 +210,12 @@
                     tools:listitem="@layout/item_download_history" />
             </LinearLayout>
 
-            <!-- Empty State -->
+            <!-- Empty State (Purchased Tab) -->
             <LinearLayout
                 android:id="@+id/tvEmpty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="100dp"
+                android:layout_marginTop="80dp"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:visibility="gone">
@@ -217,27 +239,27 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
-                    android:text="Your library is empty"
+                    android:layout_marginTop="24dp"
+                    android:text="No purchased assets yet"
                     android:textColor="@color/text_primary"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="center"
                     android:text="Browse the marketplace to find\npremium assets for your projects."
                     android:textColor="@color/text_secondary"
-                    android:textSize="15sp"
+                    android:textSize="14sp"
                     android:lineSpacingExtra="4dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBrowseMarket"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="24dp"
                     android:backgroundTint="@color/primary"
                     android:text="Explore Market"
                     android:textAllCaps="false"
@@ -249,7 +271,96 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Simplified Bottom Checkout Area (No White Card) -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   TAB 1: My Uploads                                -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollViewUploads"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/content_padding_bottom"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/layoutCheckoutBar"
+        app:layout_constraintTop_toBottomOf="@id/sectionActive">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MY UPLOADED ASSETS"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <!-- My Uploads Grid -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvUploads"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="2"
+                tools:listitem="@layout/item_asset_small" />
+
+            <!-- Empty State (Uploads Tab) -->
+            <LinearLayout
+                android:id="@+id/tvEmptyUploads"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="80dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:cardBackgroundColor="@color/glass_surface"
+                    app:cardCornerRadius="50dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/glass_border"
+                    app:strokeWidth="1dp">
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_upload"
+                        app:tint="@color/text_muted" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="No uploads yet"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="Publish your first asset to\nsee it appear here."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Checkout Bar -->
     <LinearLayout
         android:id="@+id/layoutCheckoutBar"
         android:layout_width="match_parent"
@@ -257,7 +368,8 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="20dp"
-        android:background="@android:color/transparent"
+        android:background="@color/surface_card"
+        android:elevation="8dp"
         android:visibility="gone"
         tools:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent">

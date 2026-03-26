@@ -61,12 +61,44 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val themeManager = ThemeManager(requireContext())
         updateThemeIcon(themeManager.isDarkMode())
 
+        // ── Menu item titles ────────────────────────────────────────────────
         binding.menuAccount.title.text = "Profile Settings"
         binding.menuCart.title.text = "Purchase History"
         binding.menuPurchases.title.text = "My Assets Library"
         binding.menuWallet.title.text = "Wallet & Payments"
         binding.menuDeveloperAssets.title.text = "Manage My Uploads"
         binding.menuDeveloperDashboard.title.text = "Earnings & Stats"
+
+        // ── Set distinct icons per menu item programmatically ───────────────
+        // (app:icon in <include> tags doesn't propagate without data binding)
+        binding.menuAccount.icon.setImageResource(R.drawable.ic_settings)
+        binding.menuCart.icon.setImageResource(R.drawable.ic_analytics)
+        binding.menuPurchases.icon.setImageResource(R.drawable.ic_layers)
+        binding.menuWallet.icon.setImageResource(R.drawable.ic_wallet)
+        binding.menuDeveloperAssets.icon.setImageResource(R.drawable.ic_upload)
+        binding.menuDeveloperDashboard.icon.setImageResource(R.drawable.ic_trending_up)
+
+        // ── Tint icon container backgrounds for visual flair ───────────────
+        val indigo  = android.graphics.Color.parseColor("#1A6366F1")
+        val purple  = android.graphics.Color.parseColor("#1A8B5CF6")
+        val emerald = android.graphics.Color.parseColor("#1A10B981")
+        val amber   = android.graphics.Color.parseColor("#1AF59E0B")
+        val rose    = android.graphics.Color.parseColor("#1AEF4444")
+        val sky     = android.graphics.Color.parseColor("#1A0EA5E8")
+
+        fun tintIconCard(menu: android.view.View, color: Int) {
+            val imageView = menu.findViewById<android.widget.ImageView>(
+                com.pixelmarket.app.R.id.icon
+            )
+            val card = imageView?.parent as? com.google.android.material.card.MaterialCardView
+            card?.setCardBackgroundColor(color)
+        }
+        tintIconCard(binding.menuAccount.root, indigo)
+        tintIconCard(binding.menuCart.root, purple)
+        tintIconCard(binding.menuPurchases.root, emerald)
+        tintIconCard(binding.menuWallet.root, amber)
+        tintIconCard(binding.menuDeveloperAssets.root, rose)
+        tintIconCard(binding.menuDeveloperDashboard.root, sky)
 
 
         binding.btnThemeToggle.setOnClickListener {
@@ -113,6 +145,45 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         binding.menuDeveloperDashboard.root.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_developerStatsFragment)
         }
+
+        binding.menuAccount.root.setOnClickListener {
+            showEditProfileDialog()
+        }
+    }
+
+    private fun showEditProfileDialog() {
+        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser ?: return
+        
+        val editText = android.widget.EditText(requireContext()).apply {
+            setText(binding.tvName.text)
+            hint = "Enter your name"
+            setPadding(40, 40, 40, 40)
+            setTextColor(android.graphics.Color.BLACK)
+        }
+        
+        val container = android.widget.FrameLayout(requireContext()).apply {
+            setPadding(40, 20, 40, 0)
+            addView(editText)
+        }
+        
+        androidx.appcompat.app.AlertDialog.Builder(requireContext(), R.style.Base_Theme_PixelMarket) // Use project style for better UI
+            .setTitle("Edit Profile")
+            .setView(container)
+            .setPositiveButton("Save") { _, _ ->
+                val newName = editText.text.toString().trim()
+                if (newName.isNotEmpty()) {
+                    firestore.collection("users").document(user.uid)
+                        .update("username", newName)
+                        .addOnSuccessListener {
+                            android.widget.Toast.makeText(requireContext(), "Profile updated", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            android.widget.Toast.makeText(requireContext(), "Failed: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun loadUserProfile(uid: String) {

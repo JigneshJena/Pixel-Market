@@ -70,6 +70,14 @@ class AssetDetailsViewModel @Inject constructor(
     private val _cartEvent = Channel<String>(Channel.BUFFERED)
     val cartEvent: Flow<String> = _cartEvent.receiveAsFlow()
 
+    // True when the logged-in user is the uploader/owner of this asset
+    private val _isOwnAsset = MutableStateFlow(false)
+    val isOwnAsset: StateFlow<Boolean> = _isOwnAsset
+
+    // Real-time seller profile
+    private val _sellerProfile = MutableStateFlow<com.pixelmarket.app.domain.model.User?>(null)
+    val sellerProfile: StateFlow<com.pixelmarket.app.domain.model.User?> = _sellerProfile
+
     private var currentAssetId: String = ""
     // Guard flags so we don't re-launch listeners on every Firestore update
     private var likeCountInitialized = false
@@ -88,6 +96,10 @@ class AssetDetailsViewModel @Inject constructor(
                 if (result is Resource.Success) {
                     result.data?.let { asset ->
 
+                        // Check if current user is the owner/uploader
+                        val userId = FirebaseAuth.getInstance().currentUser?.uid
+                        _isOwnAsset.value = userId != null && userId == asset.sellerId
+
                         // Set likeCount ONCE from Firestore on first load.
                         // After that, RTDB listener (below) owns the count.
                         if (!likeCountInitialized) {
@@ -98,12 +110,14 @@ class AssetDetailsViewModel @Inject constructor(
                         // Check purchase & rating status ONCE — not on every Firestore ping
                         if (!purchaseAndRatingChecked) {
                             purchaseAndRatingChecked = true
-                            val userId = FirebaseAuth.getInstance().currentUser?.uid
                             if (userId != null) {
                                 _isPurchased.value = assetRepository.isAssetPurchased(userId, assetId)
                                 checkUserRated(userId, assetId)
                             }
                         }
+
+                        // Real-time fetch seller profile if missing or always to keep it fresh
+                        fetchSellerProfile(asset.sellerId)
                     }
                 }
             }
@@ -123,6 +137,18 @@ class AssetDetailsViewModel @Inject constructor(
 
         // ── 4. Cart status ─────────────────────────────────────────────────────
         checkCartStatus(assetId)
+    }
+
+    private fun fetchSellerProfile(sellerId: String) {
+        if (sellerId.isBlank()) return
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(sellerId)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null || snapshot == null || !snapshot.exists()) return@addSnapshotListener
+                val user = snapshot.toObject(com.pixelmarket.app.domain.model.User::class.java)
+                _sellerProfile.value = user
+            }
     }
 
     private fun checkCartStatus(assetId: String) {

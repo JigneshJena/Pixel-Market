@@ -62,6 +62,42 @@ class UploadViewModel @Inject constructor(
     private val _previewVideoUrl = MutableStateFlow<String?>(null)
     val previewVideoUrl: StateFlow<String?> = _previewVideoUrl
 
+    // Edit mode tracking
+    private var isEditMode = false
+    private var editAsset: Asset? = null
+    private val _initialEditData = MutableStateFlow<Asset?>(null)
+    val initialEditData: StateFlow<Asset?> = _initialEditData
+
+    /**
+     * Load an existing asset to edit
+     */
+    fun initEditMode(assetId: String) {
+        if (assetId.isBlank() || isEditMode) return
+        viewModelScope.launch {
+            _uiState.value = UploadUiState.UploadingFiles // act as loading state
+            assetRepository.getAssetDetails(assetId).collect { result ->
+                if (result is Resource.Success && result.data != null) {
+                    val asset = result.data
+                    isEditMode = true
+                    editAsset = asset
+                    
+                    _thumbnailUrl.value = asset.thumbnailUrl
+                    _thumbnailType.value = asset.thumbnailType
+                    _assetFileUrl.value = asset.fileUrls.firstOrNull()
+                    _assetFileType.value = asset.fileType
+                    _assetFileSize.value = asset.fileSizeBytes
+                    _assetFileSizeFormatted.value = asset.fileSize
+                    _previewVideoUrl.value = asset.previewVideoUrl
+                    
+                    _initialEditData.value = asset
+                    _uiState.value = UploadUiState.Idle
+                } else if (result is Resource.Error) {
+                    _uiState.value = UploadUiState.Error("Failed to load asset: ${result.message}")
+                }
+            }
+        }
+    }
+
     /**
      * Upload thumbnail image or GIF
      */
@@ -192,8 +228,9 @@ class UploadViewModel @Inject constructor(
                 }
 
                 // 2. Prepare Asset object
+                val assetId = if (isEditMode) editAsset!!.id else UUID.randomUUID().toString()
                 val asset = Asset(
-                    id = UUID.randomUUID().toString(),
+                    id = assetId,
                     title = title,
                     description = description,
                     category = category,
@@ -207,12 +244,13 @@ class UploadViewModel @Inject constructor(
                     fileSizeBytes = _assetFileSize.value,
                     sellerId = currentUser.uid,
                     sellerName = currentUser.displayName ?: currentUser.email?.substringBefore("@") ?: "Unknown",
-                    createdAt = com.google.firebase.Timestamp.now(),
+                    createdAt = if (isEditMode) editAsset!!.createdAt else com.google.firebase.Timestamp.now(),
                     updatedAt = com.google.firebase.Timestamp.now(),
-                    downloadCount = 0,
-                    rating = 0.0,
-                    featured = false,
-                    approved = true
+                    downloadCount = if (isEditMode) editAsset!!.downloadCount else 0,
+                    rating = if (isEditMode) editAsset!!.rating else 0.0,
+                    likeCount = if (isEditMode) editAsset!!.likeCount else 0,
+                    featured = if (isEditMode) editAsset!!.featured else false,
+                    approved = if (isEditMode) editAsset!!.approved else true
                 )
 
                 // 3. Save to repository
@@ -242,6 +280,9 @@ class UploadViewModel @Inject constructor(
     }
 
     private fun resetForm() {
+        isEditMode = false
+        editAsset = null
+        _initialEditData.value = null
         _thumbnailUrl.value = null
         _assetFileUrl.value = null
         _previewVideoUrl.value = null
